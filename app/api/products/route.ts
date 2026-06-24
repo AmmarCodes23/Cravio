@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import fs from "fs";
 import path from "path";
-import type { Session } from "next-auth";
-
-type SessionWithRole = Session & { user: { id?: string; role?: string } };
+import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
 
 type ProductInput = {
   name?: string;
@@ -18,23 +14,11 @@ type ProductInput = {
   consumerPrice?: number | string;
   bulkPrice?: number | string;
   bulkLimit?: number | string | null;
+  /** Landed / average unit cost (inventory, purchases); optional. */
+  costPrice?: number | string | null;
   image?: string | null;
   description?: string | null;
 };
-
-async function ensureAdmin() {
-  const session = (await getServerSession(authOptions)) as SessionWithRole | null;
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
-  if (session.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Access denied" }, { status: 403 });
-  }
-
-  return null;
-}
 
 const parseOptionalNumber = (value: unknown) => {
   if (value === undefined || value === null || value === "") return null;
@@ -73,6 +57,8 @@ async function buildProductData(input: ProductInput) {
     throw new Error("Invalid price values");
   }
 
+  const costPrice = parseOptionalNumber(input.costPrice);
+
   return {
     name: input.name,
     company: company.name,
@@ -83,6 +69,7 @@ async function buildProductData(input: ProductInput) {
     consumerPrice,
     bulkPrice,
     bulkLimit,
+    costPrice,
     image: input.image || "/images/dummyimage.png",
     description: input.description || null,
     companyImage: company.image || "/images/dummyimage.png",
@@ -104,7 +91,7 @@ export async function GET() {
 // POST - Seed products or create new ones
 export async function POST(request: Request) {
   try {
-    const authError = await ensureAdmin();
+    const authError = await ensureAdminOrPosApiKey(request);
     if (authError) return authError;
 
     const { searchParams } = new URL(request.url);

@@ -1,31 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Prisma } from "@/generated/prisma/client";
-import type { Session } from "next-auth";
-
-type SessionWithRole = Session & { user: { id?: string; role?: string } };
+import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
 
 const slugify = (value: string) =>
   value
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-
-async function ensureAdmin() {
-  const session = (await getServerSession(authOptions)) as SessionWithRole | null;
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
-  if (session.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Access denied" }, { status: 403 });
-  }
-
-  return null;
-}
 
 export async function GET(
   _request: Request,
@@ -50,7 +32,7 @@ export async function PATCH(
   { params }: { params: Promise<{ categoryId: string }> }
 ) {
   try {
-    const authError = await ensureAdmin();
+    const authError = await ensureAdminOrPosApiKey(request);
     if (authError) return authError;
 
     const { categoryId: categoryIdParam } = await params;
@@ -132,11 +114,11 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ categoryId: string }> }
 ) {
   try {
-    const authError = await ensureAdmin();
+    const authError = await ensureAdminOrPosApiKey(request);
     if (authError) return authError;
 
     const { categoryId: categoryIdParam } = await params;

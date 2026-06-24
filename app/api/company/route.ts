@@ -1,13 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import fs from "fs";
 import path from "path";
 import { Prisma } from "@/generated/prisma/client";
-import type { Session } from "next-auth";
-
-type SessionWithRole = Session & { user: { id?: string; role?: string } };
+import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
 
 type CompanyInput = {
   name: string;
@@ -16,20 +12,6 @@ type CompanyInput = {
   categoryIds?: Array<number | string>;
   categories?: Array<string | null>;
 };
-
-async function ensureAdmin() {
-  const session = (await getServerSession(authOptions)) as SessionWithRole | null;
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
-  if (session.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Access denied" }, { status: 403 });
-  }
-
-  return null;
-}
 
 const parseCategoryIds = async (input: unknown) => {
   if (!input) return [];
@@ -63,7 +45,7 @@ const parseCategoryIds = async (input: unknown) => {
 // POST - Seed companies or create companies
 export async function POST(request: Request) {
   try {
-    const authError = await ensureAdmin();
+    const authError = await ensureAdminOrPosApiKey(request);
     if (authError) return authError;
 
     const { searchParams } = new URL(request.url);

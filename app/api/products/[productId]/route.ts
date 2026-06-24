@@ -1,25 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Prisma } from "@/generated/prisma/client";
-import type { Session } from "next-auth";
-
-type SessionWithRole = Session & { user: { id?: string; role?: string } };
-
-async function ensureAdmin() {
-  const session = (await getServerSession(authOptions)) as SessionWithRole | null;
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
-  if (session.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Access denied" }, { status: 403 });
-  }
-
-  return null;
-}
+import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
 
 const parseNullableNumber = (value: unknown) => {
   if (value === undefined) return undefined;
@@ -51,7 +33,7 @@ export async function PATCH(
   { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
-    const authError = await ensureAdmin();
+    const authError = await ensureAdminOrPosApiKey(request);
     if (authError) return authError;
 
     const { productId: productIdParam } = await params;
@@ -66,6 +48,7 @@ export async function PATCH(
       retailPrice?: number | string;
       bulkPrice?: number | string;
       bulkLimit?: number | string | null;
+      costPrice?: number | string | null;
       image?: string | null;
       description?: string | null;
       companyId?: number | string;
@@ -109,6 +92,18 @@ export async function PATCH(
       data.bulkLimit = val;
     }
 
+    if (body.costPrice !== undefined) {
+      if (body.costPrice === null || body.costPrice === "") {
+        data.costPrice = null;
+      } else {
+        const val = Number(body.costPrice);
+        if (!Number.isFinite(val)) {
+          return NextResponse.json({ error: "Invalid cost price" }, { status: 400 });
+        }
+        data.costPrice = val;
+      }
+    }
+
     if (body.image !== undefined) {
       data.image = body.image || "/images/dummyimage.png";
     }
@@ -127,6 +122,7 @@ export async function PATCH(
         return NextResponse.json({ error: "Company not found" }, { status: 404 });
       }
       data.companyRel = { connect: { id: company.id } };
+      data.company = company.name;
       data.companyImage = company.image || "/images/dummyimage.png";
     }
 
@@ -140,6 +136,7 @@ export async function PATCH(
         return NextResponse.json({ error: "Category not found" }, { status: 404 });
       }
       data.categoryRel = { connect: { id: category.id } };
+      data.category = category.name;
     }
 
     if (Object.keys(data).length === 0) {
@@ -176,11 +173,11 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
-    const authError = await ensureAdmin();
+    const authError = await ensureAdminOrPosApiKey(request);
     if (authError) return authError;
 
     const { productId: productIdParam } = await params;
