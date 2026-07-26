@@ -10,6 +10,7 @@ type CategoryInput = {
   url?: string;
   image?: string | null;
   productCount?: number;
+  isHidden?: boolean;
 };
 
 const slugify = (value: string) =>
@@ -66,12 +67,14 @@ export async function POST(request: Request) {
               url: category.url,
               image: category.image ?? undefined,
               productCount: category.productCount || 0,
+              ...(category.isHidden !== undefined ? { isHidden: Boolean(category.isHidden) } : {}),
             },
             create: {
               name: category.name,
               url: category.url,
               image: category.image ?? undefined,
               productCount: category.productCount || 0,
+              isHidden: category.isHidden !== undefined ? Boolean(category.isHidden) : false,
             },
           })
         )
@@ -120,12 +123,14 @@ export async function POST(request: Request) {
             url: category.url,
             image: category.image ?? undefined,
             productCount: category.productCount || 0,
+            ...(category.isHidden !== undefined ? { isHidden: Boolean(category.isHidden) } : {}),
           },
           create: {
             name: category.name,
             url: category.url,
             image: category.image ?? undefined,
             productCount: category.productCount || 0,
+            isHidden: category.isHidden !== undefined ? Boolean(category.isHidden) : false,
           },
         })
       )
@@ -163,9 +168,17 @@ export async function POST(request: Request) {
 }
 
 // GET - Fetch all categories
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    let includeHidden = searchParams.get("includeHidden") === "true";
+    if (includeHidden) {
+      const authError = await ensureAdminOrPosApiKey(request);
+      if (authError) includeHidden = false;
+    }
+
     const categories = await prisma.category.findMany({
+      where: includeHidden ? {} : { isHidden: false },
       orderBy: {
         name: "asc",
       },

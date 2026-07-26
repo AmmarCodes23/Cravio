@@ -43,12 +43,13 @@ const emptyProductFilters = (): ProductFilters => ({
   quantityMax: "",
 });
 
-const emptyCategory: CategoryFormState = { name: "", url: "", imageMode: "url", imageFile: null };
+const emptyCategory: CategoryFormState = { name: "", url: "", isHidden: false, imageMode: "url", imageFile: null };
 const emptyCompany: CompanyFormState = {
   name: "",
   image: "",
   categoryIds: [],
   productCount: "",
+  isHidden: false,
   imageMode: "url",
   imageFile: null,
 };
@@ -62,6 +63,7 @@ const emptyProduct: ProductFormState = {
   bulkLimit: "",
   image: "",
   description: "",
+  isHidden: false,
   imageMode: "url",
   imageFile: null,
 };
@@ -120,9 +122,9 @@ export default function CatalogAdminPage() {
     try {
       setLoading(true);
       const [catRes, compRes, prodRes] = await Promise.all([
-        fetch("/api/category"),
-        fetch("/api/company"),
-        fetch("/api/products"),
+        fetch("/api/category?includeHidden=true"),
+        fetch("/api/company?includeHidden=true"),
+        fetch("/api/products?includeHidden=true"),
       ]);
 
       if (catRes.ok) setCategories(await catRes.json());
@@ -244,6 +246,7 @@ export default function CatalogAdminPage() {
           name: categoryForm.name.trim(),
           url: imageUrl,
           image: imageUrl || undefined,
+          isHidden: Boolean(categoryForm.isHidden),
         }),
       });
 
@@ -329,6 +332,7 @@ export default function CatalogAdminPage() {
         productCount: companyForm.productCount
           ? Number(companyForm.productCount)
           : undefined,
+        isHidden: Boolean(companyForm.isHidden),
       };
 
       const res = await fetch(url, {
@@ -430,6 +434,7 @@ export default function CatalogAdminPage() {
       bulkLimit: productForm.bulkLimit ? Number(productForm.bulkLimit) : null,
       image: imageUrl || undefined,
       description: productForm.description.trim() || null,
+      isHidden: Boolean(productForm.isHidden),
     };
 
     if (
@@ -530,6 +535,7 @@ export default function CatalogAdminPage() {
       setCategoryForm({
         name: cat.name,
         url: cat.url,
+        isHidden: cat.isHidden ?? false,
         imageMode: "url",
         imageFile: null,
       });
@@ -545,6 +551,7 @@ export default function CatalogAdminPage() {
         image: comp.image || "",
         categoryIds: selectedCategoryIds,
         productCount: comp.productCount.toString(),
+        isHidden: comp.isHidden ?? false,
         imageMode: "url",
         imageFile: null,
       });
@@ -562,6 +569,7 @@ export default function CatalogAdminPage() {
         bulkLimit: prod.bulkLimit?.toString() || "",
         image: prod.image,
         description: prod.description || "",
+        isHidden: prod.isHidden ?? false,
         imageMode: "url",
         imageFile: null,
       });
@@ -673,7 +681,14 @@ export default function CatalogAdminPage() {
                     selectedCategory?.id === category.id ? "bg-blue-50" : ""
                   }`}
                 >
-                  <td className="px-2 sm:px-3 py-2 font-medium">{category.name}</td>
+                  <td className="px-2 sm:px-3 py-2 font-medium">
+                    {category.name}
+                    {category.isHidden && (
+                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800">
+                        Hidden
+                      </span>
+                    )}
+                  </td>
                   <td className="px-2 sm:px-3 py-2 text-gray-600 hidden sm:table-cell">{category.url}</td>
                   <td className="px-2 sm:px-3 py-2 text-gray-600">{category.productCount}</td>
                   <td className="px-2 sm:px-3 py-2 text-right">
@@ -748,7 +763,14 @@ export default function CatalogAdminPage() {
                     selectedCompany?.id === company.id ? "bg-blue-50" : ""
                   }`}
                 >
-                  <td className="px-2 sm:px-3 py-2 font-medium text-gray-900">{company.name}</td>
+                  <td className="px-2 sm:px-3 py-2 font-medium text-gray-900">
+                    {company.name}
+                    {company.isHidden && (
+                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800">
+                        Hidden
+                      </span>
+                    )}
+                  </td>
                   <td className="px-2 sm:px-3 py-2 text-gray-600 hidden md:table-cell">
                     {(company.categories || []).join(", ") || "—"}
                   </td>
@@ -839,7 +861,14 @@ export default function CatalogAdminPage() {
                     selectedProduct?.id === product.id ? "bg-blue-50" : ""
                   }`}
                 >
-                  <td className="px-2 sm:px-3 py-2 font-medium text-gray-900">{product.name}</td>
+                  <td className="px-2 sm:px-3 py-2 font-medium text-gray-900">
+                    {product.name}
+                    {product.isHidden && (
+                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800">
+                        Hidden
+                      </span>
+                    )}
+                  </td>
                   <td className="px-2 sm:px-3 py-2 text-gray-700 hidden sm:table-cell">{product.company}</td>
                   <td className="px-2 sm:px-3 py-2 text-gray-700 hidden md:table-cell">{product.category}</td>
                   <td className="px-2 sm:px-3 py-2 text-gray-700 hidden lg:table-cell">Rs {product.consumerPrice}</td>

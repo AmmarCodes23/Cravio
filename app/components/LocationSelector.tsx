@@ -1,9 +1,10 @@
 "use client"
 import { useEffect, useMemo, useState } from "react";
-import {useLoadScript, GoogleMap, Marker} from "@react-google-maps/api"
+import { GoogleMap, Marker } from "@react-google-maps/api"
 import usePlacesAutocomplete, {getGeocode, getLatLng} from "use-places-autocomplete";
 import {Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption} from "@reach/combobox"
 import { useLocation } from "../context/LocationContext";
+import { useGoogleMaps } from "../context/GoogleMapsProvider";
 import "@reach/combobox/styles.css"
 import { useSession } from "next-auth/react";
 import { useUserInfo } from "../context/UserInfoContext";
@@ -13,7 +14,7 @@ import type {
   LocationSelectorProps,
   PlacesAutoCompleteProps,
 } from "../Data/database";
-import { Locate } from "lucide-react";
+import { AlertCircle, Locate } from "lucide-react";
 
 const KARACHI_BOUNDS = {
   // Use 'north', 'south', 'east', 'west' keys at the top level
@@ -24,15 +25,44 @@ const KARACHI_BOUNDS = {
 };
 
 
+function GoogleMapsError({ title, message }: { title: string; message: string }) {
+  return (
+    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="flex items-start gap-2">
+        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+        <div>
+          <p className="font-semibold">{title}</p>
+          <p className="mt-1">{message}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LocationSelector({ allowChange = false }: LocationSelectorProps = {}){
-  const {isLoaded} = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-    libraries:["places"],
-  })
+  const { isLoaded, loadError, apiKeyMissing } = useGoogleMaps();
 
-  if(!isLoaded) return <Loading/>
+  if (apiKeyMissing) {
+    return (
+      <GoogleMapsError
+        title="Google Maps API key missing"
+        message="Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in .env.local and restart the dev server."
+      />
+    );
+  }
 
-  return <Map allowChange={allowChange} />
+  if (loadError) {
+    return (
+      <GoogleMapsError
+        title="Google Maps failed to load"
+        message="Enable billing on your Google Cloud project and turn on Maps JavaScript API, Places API, and Geocoding API for this key."
+      />
+    );
+  }
+
+  if (!isLoaded) return <Loading />;
+
+  return <Map allowChange={allowChange} />;
 }
 
 function Map({ allowChange = false }: LocationSelectorProps = {}) {
@@ -217,13 +247,19 @@ const PlacesAutoComplete = ({setSelected,setAddress, setMapToOpen}:PlacesAutoCom
     value,
     setValue,
     suggestions:{status,data},
-    clearSuggestions
+    clearSuggestions,
+    init,
   } = usePlacesAutocomplete({
+    initOnMount: false,
     requestOptions:{
       locationRestriction: KARACHI_BOUNDS,
-      componentRestrictions: { country: 'pk' },
-    }
+      componentRestrictions: { country: "pk" },
+    },
   });
+
+  useEffect(() => {
+    init();
+  }, [init]);
 
   const handleSelect = async (valadd: string) => {
     setValue(valadd, false);

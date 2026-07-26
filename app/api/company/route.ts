@@ -11,6 +11,7 @@ type CompanyInput = {
   productCount?: number | string;
   categoryIds?: Array<number | string>;
   categories?: Array<string | null>;
+  isHidden?: boolean;
 };
 
 const parseCategoryIds = async (input: unknown) => {
@@ -188,11 +189,13 @@ export async function POST(request: Request) {
         update: {
           image: company.image || null,
           productCount,
+          ...(company.isHidden !== undefined ? { isHidden: Boolean(company.isHidden) } : {}),
         },
         create: {
           name: company.name,
           image: company.image || null,
           productCount,
+          isHidden: company.isHidden !== undefined ? Boolean(company.isHidden) : false,
         },
       });
 
@@ -242,14 +245,24 @@ export async function POST(request: Request) {
 }
 
 // GET - Fetch all companies
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    let includeHidden = searchParams.get("includeHidden") === "true";
+    if (includeHidden) {
+      const authError = await ensureAdminOrPosApiKey(request);
+      if (authError) includeHidden = false;
+    }
+
     const companies = await prisma.company.findMany({
+      where: includeHidden ? {} : { isHidden: false },
       orderBy: {
         name: "asc",
       },
       include: {
-        categories: true,
+        categories: {
+          where: includeHidden ? {} : { isHidden: false },
+        },
       },
     });
 
@@ -258,6 +271,7 @@ export async function GET() {
       name: c.name,
       image: c.image,
       productCount: c.productCount,
+      isHidden: c.isHidden,
       categories: c.categories.map((cat) => cat.name),
       createdAt: c.createdAt,
       updatedAt: c.updatedAt,

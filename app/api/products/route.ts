@@ -16,8 +16,11 @@ type ProductInput = {
   bulkLimit?: number | string | null;
   /** Landed / average unit cost (inventory, purchases); optional. */
   costPrice?: number | string | null;
+  /** Optional product barcode for POS scan-to-cart / inventory linking. */
+  barcode?: string | null;
   image?: string | null;
   description?: string | null;
+  isHidden?: boolean;
 };
 
 const parseOptionalNumber = (value: unknown) => {
@@ -58,6 +61,24 @@ async function buildProductData(input: ProductInput) {
   }
 
   const costPrice = parseOptionalNumber(input.costPrice);
+  const barcode =
+    input.barcode === undefined
+      ? undefined
+      : input.barcode === null || String(input.barcode).trim() === ""
+        ? null
+        : String(input.barcode).trim();
+
+  if (barcode) {
+    const existing = await prisma.product.findFirst({
+      where: { barcode },
+      select: { id: true, name: true },
+    });
+    if (existing) {
+      throw new Error(
+        `Barcode "${barcode}" is already used by product "${existing.name}" (id ${existing.id})`
+      );
+    }
+  }
 
   return {
     name: input.name,
@@ -70,6 +91,8 @@ async function buildProductData(input: ProductInput) {
     bulkPrice,
     bulkLimit,
     costPrice,
+    isHidden: input.isHidden !== undefined ? Boolean(input.isHidden) : false,
+    ...(barcode !== undefined ? { barcode } : {}),
     image: input.image || "/images/dummyimage.png",
     description: input.description || null,
     companyImage: company.image || "/images/dummyimage.png",
@@ -78,9 +101,28 @@ async function buildProductData(input: ProductInput) {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const products = await prisma.product.findMany();
+    const { searchParams } = new URL(request.url);
+    let includeHidden = searchParams.get("includeHidden") === "true";
+    if (includeHidden) {
+      const authError = await ensureAdminOrPosApiKey(request);
+      if (authError) includeHidden = false;
+    }
+
+    const products = await prisma.product.findMany({
+      where: includeHidden
+        ? {}
+        : {
+            isHidden: false,
+            OR: [{ companyId: null }, { companyRel: { isHidden: false } }],
+            AND: [
+              {
+                OR: [{ categoryId: null }, { categoryRel: { isHidden: false } }],
+              },
+            ],
+          },
+    });
     return NextResponse.json(products);
   } catch (err) {
     console.error(err);
@@ -253,7 +295,12 @@ export async function POST(request: Request) {
         error: "Failed to process products",
         details: error instanceof Error ? error.message : undefined,
       },
-      { status: 500 }
+      {
+        status:
+          error instanceof Error && error.message.includes("Barcode")
+            ? 409
+            : 500,
+      }
     );
   }
 }

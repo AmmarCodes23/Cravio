@@ -41,6 +41,7 @@ export type CompanyMinAggregateOutputType = {
   name: string | null
   image: string | null
   productCount: number | null
+  isHidden: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,6 +51,7 @@ export type CompanyMaxAggregateOutputType = {
   name: string | null
   image: string | null
   productCount: number | null
+  isHidden: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,6 +61,7 @@ export type CompanyCountAggregateOutputType = {
   name: number
   image: number
   productCount: number
+  isHidden: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -80,6 +83,7 @@ export type CompanyMinAggregateInputType = {
   name?: true
   image?: true
   productCount?: true
+  isHidden?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -89,6 +93,7 @@ export type CompanyMaxAggregateInputType = {
   name?: true
   image?: true
   productCount?: true
+  isHidden?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -98,6 +103,7 @@ export type CompanyCountAggregateInputType = {
   name?: true
   image?: true
   productCount?: true
+  isHidden?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -194,6 +200,7 @@ export type CompanyGroupByOutputType = {
   name: string
   image: string | null
   productCount: number
+  isHidden: boolean
   createdAt: Date
   updatedAt: Date
   _count: CompanyCountAggregateOutputType | null
@@ -226,6 +233,7 @@ export type CompanyWhereInput = {
   name?: Prisma.StringFilter<"Company"> | string
   image?: Prisma.StringNullableFilter<"Company"> | string | null
   productCount?: Prisma.IntFilter<"Company"> | number
+  isHidden?: Prisma.BoolFilter<"Company"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   products?: Prisma.ProductListRelationFilter
@@ -237,6 +245,7 @@ export type CompanyOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
   productCount?: Prisma.SortOrder
+  isHidden?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   products?: Prisma.ProductOrderByRelationAggregateInput
@@ -251,6 +260,7 @@ export type CompanyWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.CompanyWhereInput | Prisma.CompanyWhereInput[]
   image?: Prisma.StringNullableFilter<"Company"> | string | null
   productCount?: Prisma.IntFilter<"Company"> | number
+  isHidden?: Prisma.BoolFilter<"Company"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   products?: Prisma.ProductListRelationFilter
@@ -262,6 +272,7 @@ export type CompanyOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
   productCount?: Prisma.SortOrder
+  isHidden?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CompanyCountOrderByAggregateInput
@@ -279,6 +290,7 @@ export type CompanyScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Company"> | string
   image?: Prisma.StringNullableWithAggregatesFilter<"Company"> | string | null
   productCount?: Prisma.IntWithAggregatesFilter<"Company"> | number
+  isHidden?: Prisma.BoolWithAggregatesFilter<"Company"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Company"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Company"> | Date | string
 }
@@ -287,6 +299,7 @@ export type CompanyCreateInput = {
   name: string
   image?: string | null
   productCount?: number
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductCreateNestedManyWithoutCompanyRelInput
@@ -298,6 +311,7 @@ export type CompanyUncheckedCreateInput = {
   name: string
   image?: string | null
   productCount?: number
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutCompanyRelInput
@@ -308,6 +322,7 @@ export type CompanyUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUpdateManyWithoutCompanyRelNestedInput
@@ -319,6 +334,7 @@ export type CompanyUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutCompanyRelNestedInput
@@ -330,6 +346,7 @@ export type CompanyCreateManyInput = {
   name: string
   image?: string | null
   productCount?: number
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -338,6 +355,7 @@ export type CompanyUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -347,6 +365,7 @@ export type CompanyUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -356,6 +375,7 @@ export type CompanyCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   image?: Prisma.SortOrder
   productCount?: Prisma.SortOrder
+  isHidden?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -370,6 +390,7 @@ export type CompanyMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   image?: Prisma.SortOrder
   productCount?: Prisma.SortOrder
+  isHidden?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -379,6 +400,7 @@ export type CompanyMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   image?: Prisma.SortOrder
   productCount?: Prisma.SortOrder
+  isHidden?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -409,6 +431,10 @@ export type IntFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type CompanyCreateNestedManyWithoutCategoriesInput = {
@@ -469,6 +495,7 @@ export type CompanyCreateWithoutCategoriesInput = {
   name: string
   image?: string | null
   productCount?: number
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductCreateNestedManyWithoutCompanyRelInput
@@ -479,6 +506,7 @@ export type CompanyUncheckedCreateWithoutCategoriesInput = {
   name: string
   image?: string | null
   productCount?: number
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutCompanyRelInput
@@ -513,6 +541,7 @@ export type CompanyScalarWhereInput = {
   name?: Prisma.StringFilter<"Company"> | string
   image?: Prisma.StringNullableFilter<"Company"> | string | null
   productCount?: Prisma.IntFilter<"Company"> | number
+  isHidden?: Prisma.BoolFilter<"Company"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Company"> | Date | string
 }
@@ -521,6 +550,7 @@ export type CompanyCreateWithoutProductsInput = {
   name: string
   image?: string | null
   productCount?: number
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.CategoryCreateNestedManyWithoutCompaniesInput
@@ -531,6 +561,7 @@ export type CompanyUncheckedCreateWithoutProductsInput = {
   name: string
   image?: string | null
   productCount?: number
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutCompaniesInput
@@ -556,6 +587,7 @@ export type CompanyUpdateWithoutProductsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.CategoryUpdateManyWithoutCompaniesNestedInput
@@ -566,6 +598,7 @@ export type CompanyUncheckedUpdateWithoutProductsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.CategoryUncheckedUpdateManyWithoutCompaniesNestedInput
@@ -575,6 +608,7 @@ export type CompanyUpdateWithoutCategoriesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUpdateManyWithoutCompanyRelNestedInput
@@ -585,6 +619,7 @@ export type CompanyUncheckedUpdateWithoutCategoriesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutCompanyRelNestedInput
@@ -595,6 +630,7 @@ export type CompanyUncheckedUpdateManyWithoutCategoriesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -644,6 +680,7 @@ export type CompanySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   name?: boolean
   image?: boolean
   productCount?: boolean
+  isHidden?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   products?: boolean | Prisma.Company$productsArgs<ExtArgs>
@@ -656,6 +693,7 @@ export type CompanySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   name?: boolean
   image?: boolean
   productCount?: boolean
+  isHidden?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["company"]>
@@ -665,6 +703,7 @@ export type CompanySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   name?: boolean
   image?: boolean
   productCount?: boolean
+  isHidden?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["company"]>
@@ -674,11 +713,12 @@ export type CompanySelectScalar = {
   name?: boolean
   image?: boolean
   productCount?: boolean
+  isHidden?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CompanyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "image" | "productCount" | "createdAt" | "updatedAt", ExtArgs["result"]["company"]>
+export type CompanyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "image" | "productCount" | "isHidden" | "createdAt" | "updatedAt", ExtArgs["result"]["company"]>
 export type CompanyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | Prisma.Company$productsArgs<ExtArgs>
   categories?: boolean | Prisma.Company$categoriesArgs<ExtArgs>
@@ -698,6 +738,7 @@ export type $CompanyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     name: string
     image: string | null
     productCount: number
+    isHidden: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["company"]>
@@ -1129,6 +1170,7 @@ export interface CompanyFieldRefs {
   readonly name: Prisma.FieldRef<"Company", 'String'>
   readonly image: Prisma.FieldRef<"Company", 'String'>
   readonly productCount: Prisma.FieldRef<"Company", 'Int'>
+  readonly isHidden: Prisma.FieldRef<"Company", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Company", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Company", 'DateTime'>
 }

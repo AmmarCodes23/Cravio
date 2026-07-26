@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
 import Provider from "./context/SessionProvider";
 import LayoutSwitcher from "./components/LayoutSwitcher";
+
+export const metadata: Metadata = {
+  icons: {
+    icon: "/images/Cravio_Logo.png",
+    shortcut: "/images/Cravio_Logo.png",
+    apple: "/images/Cravio_Logo.png",
+  },
+};
 
 const sifonnFont = localFont({
   src: "./fonts/Sifonn-Pro.ttf",

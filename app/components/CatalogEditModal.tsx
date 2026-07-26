@@ -161,6 +161,18 @@ export default function CatalogEditModal({
                   />
                 </div>
               )}
+
+              <label className="flex items-center gap-2 pt-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={categoryForm.isHidden ?? false}
+                  onChange={(e) =>
+                    onCategoryFormChange({ ...categoryForm, isHidden: e.target.checked })
+                  }
+                  className="w-4 h-4 text-primary rounded focus:ring-primary"
+                />
+                <span className="text-sm font-semibold text-gray-700">Hide from Website & App</span>
+              </label>
             </div>
           )}
 
@@ -287,6 +299,18 @@ export default function CatalogEditModal({
                   )}
                 </div>
               </div>
+
+              <label className="flex items-center gap-2 pt-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={companyForm.isHidden ?? false}
+                  onChange={(e) =>
+                    onCompanyFormChange({ ...companyForm, isHidden: e.target.checked })
+                  }
+                  className="w-4 h-4 text-primary rounded focus:ring-primary"
+                />
+                <span className="text-sm font-semibold text-gray-700">Hide from Website & App</span>
+              </label>
             </div>
           )}
 
@@ -490,6 +514,18 @@ export default function CatalogEditModal({
                   rows={3}
                 />
               </div>
+
+              <label className="flex items-center gap-2 pt-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={productForm.isHidden ?? false}
+                  onChange={(e) =>
+                    onProductFormChange({ ...productForm, isHidden: e.target.checked })
+                  }
+                  className="w-4 h-4 text-primary rounded focus:ring-primary"
+                />
+                <span className="text-sm font-semibold text-gray-700">Hide from Website & App</span>
+              </label>
             </div>
           )}
 

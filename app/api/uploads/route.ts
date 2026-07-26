@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
+import { ensureStaffOrPosApiKey } from "@/lib/pos-or-admin-auth";
 
 export async function POST(request: Request) {
   try {
-    const authError = await ensureAdminOrPosApiKey(request);
+    const authError = await ensureStaffOrPosApiKey(request);
     if (authError) return authError;
 
     const workerUrl = process.env.WORKER_UPLOAD_URL;

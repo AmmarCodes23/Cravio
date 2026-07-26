@@ -44,9 +44,11 @@ export async function PATCH(
       image?: string | null;
       productCount?: number | string;
       categoryIds?: Array<number | string>;
+      isHidden?: boolean;
     };
     const data: Prisma.CompanyUpdateInput = {};
 
+    if (body.isHidden !== undefined) data.isHidden = Boolean(body.isHidden);
     if (body.name !== undefined) data.name = String(body.name);
     if (body.image !== undefined) data.image = body.image || null;
 

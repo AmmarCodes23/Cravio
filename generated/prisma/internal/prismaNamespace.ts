@@ -389,6 +389,7 @@ export const ModelName = {
   Company: 'Company',
   Category: 'Category',
   Product: 'Product',
+  MarketingBanner: 'MarketingBanner',
   Order: 'Order',
   OrderProduct: 'OrderProduct',
   Account: 'Account',
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "location" | "company" | "category" | "product" | "order" | "orderProduct" | "account" | "session" | "verificationToken" | "employee" | "admin" | "p2PVendor" | "orderHistory" | "receipt" | "localSale" | "localSaleItem" | "ledgerEntry" | "localPurchase" | "localPurchaseItem"
+    modelProps: "user" | "location" | "company" | "category" | "product" | "marketingBanner" | "order" | "orderProduct" | "account" | "session" | "verificationToken" | "employee" | "admin" | "p2PVendor" | "orderHistory" | "receipt" | "localSale" | "localSaleItem" | "ledgerEntry" | "localPurchase" | "localPurchaseItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -790,6 +791,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ProductCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProductCountAggregateOutputType> | number
+        }
+      }
+    }
+    MarketingBanner: {
+      payload: Prisma.$MarketingBannerPayload<ExtArgs>
+      fields: Prisma.MarketingBannerFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MarketingBannerFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MarketingBannerFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload>
+        }
+        findFirst: {
+          args: Prisma.MarketingBannerFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MarketingBannerFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload>
+        }
+        findMany: {
+          args: Prisma.MarketingBannerFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload>[]
+        }
+        create: {
+          args: Prisma.MarketingBannerCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload>
+        }
+        createMany: {
+          args: Prisma.MarketingBannerCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MarketingBannerCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload>[]
+        }
+        delete: {
+          args: Prisma.MarketingBannerDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload>
+        }
+        update: {
+          args: Prisma.MarketingBannerUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload>
+        }
+        deleteMany: {
+          args: Prisma.MarketingBannerDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MarketingBannerUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MarketingBannerUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload>[]
+        }
+        upsert: {
+          args: Prisma.MarketingBannerUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingBannerPayload>
+        }
+        aggregate: {
+          args: Prisma.MarketingBannerAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMarketingBanner>
+        }
+        groupBy: {
+          args: Prisma.MarketingBannerGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MarketingBannerGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MarketingBannerCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MarketingBannerCountAggregateOutputType> | number
         }
       }
     }
@@ -1976,6 +2051,7 @@ export const CompanyScalarFieldEnum = {
   name: 'name',
   image: 'image',
   productCount: 'productCount',
+  isHidden: 'isHidden',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1989,6 +2065,7 @@ export const CategoryScalarFieldEnum = {
   url: 'url',
   image: 'image',
   productCount: 'productCount',
+  isHidden: 'isHidden',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2015,11 +2092,25 @@ export const ProductScalarFieldEnum = {
   barcode: 'barcode',
   costPrice: 'costPrice',
   profitMargin: 'profitMargin',
+  isHidden: 'isHidden',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const MarketingBannerScalarFieldEnum = {
+  id: 'id',
+  imageUrl: 'imageUrl',
+  title: 'title',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MarketingBannerScalarFieldEnum = (typeof MarketingBannerScalarFieldEnum)[keyof typeof MarketingBannerScalarFieldEnum]
 
 
 export const OrderScalarFieldEnum = {
@@ -2325,6 +2416,13 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'OrderStatus'
  */
 export type EnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderStatus'>
@@ -2335,13 +2433,6 @@ export type EnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'OrderStatus[]'
  */
 export type ListEnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 /**
@@ -2428,6 +2519,7 @@ export type GlobalOmitConfig = {
   company?: Prisma.CompanyOmit
   category?: Prisma.CategoryOmit
   product?: Prisma.ProductOmit
+  marketingBanner?: Prisma.MarketingBannerOmit
   order?: Prisma.OrderOmit
   orderProduct?: Prisma.OrderProductOmit
   account?: Prisma.AccountOmit

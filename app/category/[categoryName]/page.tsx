@@ -28,13 +28,14 @@ export default function CategoryPage({ params }: { params: Promise<{ categoryNam
 
   // Filter your data to get products for this category only
   const products: Product[] = ProductFetch ? ProductFetch.filter(
-    (product: Product) => product.category === decodedCategoryName
+    (product: Product) => product.category === decodedCategoryName && !product.isHidden
   ) : [];
 
   const companiesForCategory = useMemo(() => {
     if (!CompaniesFetch) return [];
     const categorySlug = decodedCategoryName.toLowerCase();
     const list = CompaniesFetch.filter((c: Company) => {
+      if (c.isHidden) return false;
       if (Array.isArray(c.categories) && c.categories.length > 0) {
         return c.categories.some((cat: string | null | undefined) => cat?.toLowerCase() === categorySlug);
       }

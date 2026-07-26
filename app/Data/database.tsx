@@ -11,6 +11,7 @@ export interface CategoryFetch {
   name: string;
   url: string;
   productCount: number;
+  isHidden?: boolean;
 }
 
 export interface Company {
@@ -21,6 +22,7 @@ export interface Company {
   category: string | null;
   categoryId?: number | null;
   categories?: (string | null)[];
+  isHidden?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +43,7 @@ export interface Product {
   image: string;
   description: string | null;
   companyImage: string;
+  isHidden?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -236,6 +239,7 @@ export interface CatalogCategory {
   name: string;
   url: string;
   productCount: number;
+  isHidden?: boolean;
 }
 
 export interface CatalogCompany {
@@ -244,6 +248,7 @@ export interface CatalogCompany {
   image: string | null;
   productCount: number;
   categories?: string[];
+  isHidden?: boolean;
 }
 
 export interface CatalogProduct {
@@ -259,11 +264,13 @@ export interface CatalogProduct {
   bulkLimit?: number | null;
   image: string;
   description: string | null;
+  isHidden?: boolean;
 }
 
 export interface CategoryFormState {
   name: string;
   url: string;
+  isHidden?: boolean;
   imageMode?: "url" | "upload";
   imageFile?: File | null;
 }
@@ -273,6 +280,7 @@ export interface CompanyFormState {
   image: string;
   categoryIds: number[];
   productCount: string;
+  isHidden?: boolean;
   imageMode: "url" | "upload";
   imageFile: File | null;
 }
@@ -287,6 +295,7 @@ export interface ProductFormState {
   bulkLimit: string;
   image: string;
   description: string;
+  isHidden?: boolean;
   imageMode: "url" | "upload";
   imageFile: File | null;
 }

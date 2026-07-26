@@ -65,6 +65,11 @@ export type Category = Prisma.CategoryModel
  */
 export type Product = Prisma.ProductModel
 /**
+ * Model MarketingBanner
+ * 
+ */
+export type MarketingBanner = Prisma.MarketingBannerModel
+/**
  * Model Order
  * 
  */

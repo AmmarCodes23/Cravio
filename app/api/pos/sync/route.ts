@@ -43,6 +43,7 @@ export async function GET(request: Request) {
         name: c.name,
         image: c.image,
         productCount: c.productCount,
+        isHidden: c.isHidden,
         categories: c.categories.map((cat) => cat.name),
         createdAt: c.createdAt,
         updatedAt: c.updatedAt,

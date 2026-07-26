@@ -34,3 +34,25 @@ export async function ensureAdminOrPosApiKey(request: Request) {
 
   return null;
 }
+
+/**
+ * Allow banner/upload mutations from ADMIN or EMPLOYEE session, or a valid POS API key.
+ */
+export async function ensureStaffOrPosApiKey(request: Request) {
+  if (isValidPosApiKey(request)) {
+    return null;
+  }
+
+  const session = (await getServerSession(authOptions)) as SessionWithRole | null;
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const role = session.user?.role;
+  if (role !== "ADMIN" && role !== "EMPLOYEE") {
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
+  }
+
+  return null;
+}

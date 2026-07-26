@@ -1,15 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getRequestSession } from "@/lib/request-session";
 import { NextResponse } from "next/server";
 import type { Prisma } from "@/generated/prisma/client";
 import type { Session } from "next-auth";
 
 type SessionWithRole = Session & { user: { id?: string; role?: string } };
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const session = (await getServerSession(authOptions)) as SessionWithRole | null;
+    const session = (await getRequestSession(req)) as SessionWithRole | null;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

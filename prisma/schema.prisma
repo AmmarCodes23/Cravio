@@ -48,6 +48,7 @@ model Company {
   name         String    @unique
   image        String?
   productCount Int       @default(0)
+  isHidden     Boolean   @default(false)
   products     Product[] @relation("CompanyProducts")
   categories   Category[] @relation("CompanyCategories")
   createdAt    DateTime  @default(now())
@@ -60,6 +61,7 @@ model Category {
   url          String    @unique
   image        String?
   productCount Int       @default(0)
+  isHidden     Boolean   @default(false)
   companies    Company[] @relation("CompanyCategories")
   products     Product[] @relation("CategoryProducts")
   createdAt    DateTime  @default(now())
@@ -84,9 +86,10 @@ model Product {
   image         String
   description   String?
   companyImage  String
-  barcode       String?
+  barcode       String?         @unique
   costPrice     Float?
   profitMargin  Float?
+  isHidden      Boolean         @default(false)
   orderProducts    OrderProduct[]
   localSaleItems   LocalSaleItem[]
   localPurchaseItems LocalPurchaseItem[]
@@ -95,6 +98,16 @@ model Product {
 
   @@index([companyId])
   @@index([categoryId])
+}
+
+model MarketingBanner {
+  id        Int      @id @default(autoincrement())
+  imageUrl  String
+  title     String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum OrderStatus {

@@ -56,6 +56,7 @@ export const ModelName = {
   Company: 'Company',
   Category: 'Category',
   Product: 'Product',
+  MarketingBanner: 'MarketingBanner',
   Order: 'Order',
   OrderProduct: 'OrderProduct',
   Account: 'Account',
@@ -123,6 +124,7 @@ export const CompanyScalarFieldEnum = {
   name: 'name',
   image: 'image',
   productCount: 'productCount',
+  isHidden: 'isHidden',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -136,6 +138,7 @@ export const CategoryScalarFieldEnum = {
   url: 'url',
   image: 'image',
   productCount: 'productCount',
+  isHidden: 'isHidden',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -162,11 +165,25 @@ export const ProductScalarFieldEnum = {
   barcode: 'barcode',
   costPrice: 'costPrice',
   profitMargin: 'profitMargin',
+  isHidden: 'isHidden',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const MarketingBannerScalarFieldEnum = {
+  id: 'id',
+  imageUrl: 'imageUrl',
+  title: 'title',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MarketingBannerScalarFieldEnum = (typeof MarketingBannerScalarFieldEnum)[keyof typeof MarketingBannerScalarFieldEnum]
 
 
 export const OrderScalarFieldEnum = {

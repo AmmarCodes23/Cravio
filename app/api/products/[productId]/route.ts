@@ -49,14 +49,44 @@ export async function PATCH(
       bulkPrice?: number | string;
       bulkLimit?: number | string | null;
       costPrice?: number | string | null;
+      barcode?: string | null;
       image?: string | null;
       description?: string | null;
       companyId?: number | string;
       categoryId?: number | string;
+      isHidden?: boolean;
     };
     const data: Prisma.ProductUpdateInput = {};
 
     if (body.name !== undefined) data.name = String(body.name);
+    if (body.isHidden !== undefined) data.isHidden = Boolean(body.isHidden);
+
+    if (body.barcode !== undefined) {
+      const nextBarcode =
+        body.barcode === null || String(body.barcode).trim() === ""
+          ? null
+          : String(body.barcode).trim();
+
+      if (nextBarcode) {
+        const clash = await prisma.product.findFirst({
+          where: {
+            barcode: nextBarcode,
+            NOT: { id: productId },
+          },
+          select: { id: true, name: true },
+        });
+        if (clash) {
+          return NextResponse.json(
+            {
+              error: `Barcode "${nextBarcode}" is already used by product "${clash.name}" (id ${clash.id})`,
+            },
+            { status: 409 }
+          );
+        }
+      }
+
+      data.barcode = nextBarcode;
+    }
 
     if (body.consumerPrice !== undefined) {
       const val = Number(body.consumerPrice);
@@ -160,6 +190,16 @@ export async function PATCH(
       error.code === "P2025"
     ) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json(
+        { error: "Barcode must be unique — another product already uses this barcode" },
+        { status: 409 }
+      );
     }
 
     return NextResponse.json(

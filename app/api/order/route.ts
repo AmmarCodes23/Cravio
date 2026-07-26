@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getRequestSession } from "@/lib/request-session";
 import { NextResponse } from "next/server";
 import { resend } from "@/lib/resend";
 import { buildOrderEmail } from "@/lib/emailTemplates";
@@ -22,7 +21,7 @@ type OrderRequestBody = {
 
 export async function POST(req: Request) {
   try {
-    const session = (await getServerSession(authOptions)) as SessionWithRole | null;
+    const session = (await getRequestSession(req)) as SessionWithRole | null;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

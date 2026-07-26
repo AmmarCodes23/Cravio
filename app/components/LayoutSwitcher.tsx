@@ -17,6 +17,7 @@ import { ProductModalProvider } from "../context/ProductModalContext";
 import { LoginModalProvider } from "../context/LoginModalContext";
 import { CartProvider, useCartContext } from "../context/CartContext";
 import { LocationProvider } from "../context/LocationContext";
+import { GoogleMapsProvider } from "../context/GoogleMapsProvider";
 import { UserInfoProvider } from "../context/UserInfoContext";
 import { ProductsProvider } from "../context/ProductsContext";
 import { CategoryProvider } from "../context/categoriesContext";
@@ -32,6 +33,7 @@ type LayoutProps = {
 const ADMIN_LINKS = [
   { href: "/admin/analytics", label: "Analytics", roles: ["ADMIN"] },
   { href: "/admin/catalog", label: "Catalog", roles: ["ADMIN"] },
+  { href: "/admin/banners", label: "Banners", roles: ["ADMIN", "EMPLOYEE"] },
   { href: "/admin/orders", label: "Orders", roles: ["ADMIN", "EMPLOYEE"] },
   { href: "/admin/employees", label: "Employees", roles: ["ADMIN"] },
   { href: "/admin/p2p", label: "P2P", roles: ["ADMIN"] },
@@ -93,33 +95,35 @@ function SiteShell({ children }: LayoutProps) {
   };
 
   return (
-    <ProductsProvider>
-      <CategoryProvider>
-        <CompaniesProvider>
-          <ProductModalProvider>
-            <LoginModalProvider>
-              <VendorProvider>
-                <CartProvider>
-                  <LocationProvider>
-                    <UserInfoProvider>
-                      <ScrollRestorer />
-                      <ContentLayout>
-                        {children}
-                      </ContentLayout>
-                      <MobileBottomNav />
-                      <PendingOrdersBanner />
-                      <LoginModal />
-                      <VendorModal />
-                      <ProductModal />
-                    </UserInfoProvider>
-                  </LocationProvider>
-                </CartProvider>
-              </VendorProvider>
-            </LoginModalProvider>
-          </ProductModalProvider>
-        </CompaniesProvider>
-      </CategoryProvider>
-    </ProductsProvider>
+    <GoogleMapsProvider>
+      <ProductsProvider>
+        <CategoryProvider>
+          <CompaniesProvider>
+            <ProductModalProvider>
+              <LoginModalProvider>
+                <VendorProvider>
+                  <CartProvider>
+                    <LocationProvider>
+                      <UserInfoProvider>
+                        <ScrollRestorer />
+                        <ContentLayout>
+                          {children}
+                        </ContentLayout>
+                        <MobileBottomNav />
+                        <PendingOrdersBanner />
+                        <LoginModal />
+                        <VendorModal />
+                        <ProductModal />
+                      </UserInfoProvider>
+                    </LocationProvider>
+                  </CartProvider>
+                </VendorProvider>
+              </LoginModalProvider>
+            </ProductModalProvider>
+          </CompaniesProvider>
+        </CategoryProvider>
+      </ProductsProvider>
+    </GoogleMapsProvider>
   );
 }
 

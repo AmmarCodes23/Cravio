@@ -73,6 +73,7 @@ export type ProductMinAggregateOutputType = {
   barcode: string | null
   costPrice: number | null
   profitMargin: number | null
+  isHidden: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -96,6 +97,7 @@ export type ProductMaxAggregateOutputType = {
   barcode: string | null
   costPrice: number | null
   profitMargin: number | null
+  isHidden: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -119,6 +121,7 @@ export type ProductCountAggregateOutputType = {
   barcode: number
   costPrice: number
   profitMargin: number
+  isHidden: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -172,6 +175,7 @@ export type ProductMinAggregateInputType = {
   barcode?: true
   costPrice?: true
   profitMargin?: true
+  isHidden?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -195,6 +199,7 @@ export type ProductMaxAggregateInputType = {
   barcode?: true
   costPrice?: true
   profitMargin?: true
+  isHidden?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -218,6 +223,7 @@ export type ProductCountAggregateInputType = {
   barcode?: true
   costPrice?: true
   profitMargin?: true
+  isHidden?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -328,6 +334,7 @@ export type ProductGroupByOutputType = {
   barcode: string | null
   costPrice: number | null
   profitMargin: number | null
+  isHidden: boolean
   createdAt: Date
   updatedAt: Date
   _count: ProductCountAggregateOutputType | null
@@ -374,6 +381,7 @@ export type ProductWhereInput = {
   barcode?: Prisma.StringNullableFilter<"Product"> | string | null
   costPrice?: Prisma.FloatNullableFilter<"Product"> | number | null
   profitMargin?: Prisma.FloatNullableFilter<"Product"> | number | null
+  isHidden?: Prisma.BoolFilter<"Product"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   companyRel?: Prisma.XOR<Prisma.CompanyNullableScalarRelationFilter, Prisma.CompanyWhereInput> | null
@@ -402,6 +410,7 @@ export type ProductOrderByWithRelationInput = {
   barcode?: Prisma.SortOrderInput | Prisma.SortOrder
   costPrice?: Prisma.SortOrderInput | Prisma.SortOrder
   profitMargin?: Prisma.SortOrderInput | Prisma.SortOrder
+  isHidden?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   companyRel?: Prisma.CompanyOrderByWithRelationInput
@@ -413,6 +422,7 @@ export type ProductOrderByWithRelationInput = {
 
 export type ProductWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  barcode?: string
   AND?: Prisma.ProductWhereInput | Prisma.ProductWhereInput[]
   OR?: Prisma.ProductWhereInput[]
   NOT?: Prisma.ProductWhereInput | Prisma.ProductWhereInput[]
@@ -430,9 +440,9 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   image?: Prisma.StringFilter<"Product"> | string
   description?: Prisma.StringNullableFilter<"Product"> | string | null
   companyImage?: Prisma.StringFilter<"Product"> | string
-  barcode?: Prisma.StringNullableFilter<"Product"> | string | null
   costPrice?: Prisma.FloatNullableFilter<"Product"> | number | null
   profitMargin?: Prisma.FloatNullableFilter<"Product"> | number | null
+  isHidden?: Prisma.BoolFilter<"Product"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   companyRel?: Prisma.XOR<Prisma.CompanyNullableScalarRelationFilter, Prisma.CompanyWhereInput> | null
@@ -440,7 +450,7 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   orderProducts?: Prisma.OrderProductListRelationFilter
   localSaleItems?: Prisma.LocalSaleItemListRelationFilter
   localPurchaseItems?: Prisma.LocalPurchaseItemListRelationFilter
-}, "id">
+}, "id" | "barcode">
 
 export type ProductOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -461,6 +471,7 @@ export type ProductOrderByWithAggregationInput = {
   barcode?: Prisma.SortOrderInput | Prisma.SortOrder
   costPrice?: Prisma.SortOrderInput | Prisma.SortOrder
   profitMargin?: Prisma.SortOrderInput | Prisma.SortOrder
+  isHidden?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProductCountOrderByAggregateInput
@@ -492,6 +503,7 @@ export type ProductScalarWhereWithAggregatesInput = {
   barcode?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
   costPrice?: Prisma.FloatNullableWithAggregatesFilter<"Product"> | number | null
   profitMargin?: Prisma.FloatNullableWithAggregatesFilter<"Product"> | number | null
+  isHidden?: Prisma.BoolWithAggregatesFilter<"Product"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Product"> | Date | string
 }
@@ -512,6 +524,7 @@ export type ProductCreateInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   companyRel?: Prisma.CompanyCreateNestedOneWithoutProductsInput
@@ -540,6 +553,7 @@ export type ProductUncheckedCreateInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   orderProducts?: Prisma.OrderProductUncheckedCreateNestedManyWithoutProductInput
@@ -563,6 +577,7 @@ export type ProductUpdateInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   companyRel?: Prisma.CompanyUpdateOneWithoutProductsNestedInput
@@ -591,6 +606,7 @@ export type ProductUncheckedUpdateInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderProducts?: Prisma.OrderProductUncheckedUpdateManyWithoutProductNestedInput
@@ -617,6 +633,7 @@ export type ProductCreateManyInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -637,6 +654,7 @@ export type ProductUpdateManyMutationInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -660,6 +678,7 @@ export type ProductUncheckedUpdateManyInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -693,6 +712,7 @@ export type ProductCountOrderByAggregateInput = {
   barcode?: Prisma.SortOrder
   costPrice?: Prisma.SortOrder
   profitMargin?: Prisma.SortOrder
+  isHidden?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -730,6 +750,7 @@ export type ProductMaxOrderByAggregateInput = {
   barcode?: Prisma.SortOrder
   costPrice?: Prisma.SortOrder
   profitMargin?: Prisma.SortOrder
+  isHidden?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -753,6 +774,7 @@ export type ProductMinOrderByAggregateInput = {
   barcode?: Prisma.SortOrder
   costPrice?: Prisma.SortOrder
   profitMargin?: Prisma.SortOrder
+  isHidden?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -943,6 +965,7 @@ export type ProductCreateWithoutCompanyRelInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   categoryRel?: Prisma.CategoryCreateNestedOneWithoutProductsInput
@@ -969,6 +992,7 @@ export type ProductUncheckedCreateWithoutCompanyRelInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   orderProducts?: Prisma.OrderProductUncheckedCreateNestedManyWithoutProductInput
@@ -1024,6 +1048,7 @@ export type ProductScalarWhereInput = {
   barcode?: Prisma.StringNullableFilter<"Product"> | string | null
   costPrice?: Prisma.FloatNullableFilter<"Product"> | number | null
   profitMargin?: Prisma.FloatNullableFilter<"Product"> | number | null
+  isHidden?: Prisma.BoolFilter<"Product"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
 }
@@ -1044,6 +1069,7 @@ export type ProductCreateWithoutCategoryRelInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   companyRel?: Prisma.CompanyCreateNestedOneWithoutProductsInput
@@ -1070,6 +1096,7 @@ export type ProductUncheckedCreateWithoutCategoryRelInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   orderProducts?: Prisma.OrderProductUncheckedCreateNestedManyWithoutProductInput
@@ -1119,6 +1146,7 @@ export type ProductCreateWithoutOrderProductsInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   companyRel?: Prisma.CompanyCreateNestedOneWithoutProductsInput
@@ -1146,6 +1174,7 @@ export type ProductUncheckedCreateWithoutOrderProductsInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   localSaleItems?: Prisma.LocalSaleItemUncheckedCreateNestedManyWithoutProductInput
@@ -1184,6 +1213,7 @@ export type ProductUpdateWithoutOrderProductsInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   companyRel?: Prisma.CompanyUpdateOneWithoutProductsNestedInput
@@ -1211,6 +1241,7 @@ export type ProductUncheckedUpdateWithoutOrderProductsInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   localSaleItems?: Prisma.LocalSaleItemUncheckedUpdateManyWithoutProductNestedInput
@@ -1233,6 +1264,7 @@ export type ProductCreateWithoutLocalSaleItemsInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   companyRel?: Prisma.CompanyCreateNestedOneWithoutProductsInput
@@ -1260,6 +1292,7 @@ export type ProductUncheckedCreateWithoutLocalSaleItemsInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   orderProducts?: Prisma.OrderProductUncheckedCreateNestedManyWithoutProductInput
@@ -1298,6 +1331,7 @@ export type ProductUpdateWithoutLocalSaleItemsInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   companyRel?: Prisma.CompanyUpdateOneWithoutProductsNestedInput
@@ -1325,6 +1359,7 @@ export type ProductUncheckedUpdateWithoutLocalSaleItemsInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderProducts?: Prisma.OrderProductUncheckedUpdateManyWithoutProductNestedInput
@@ -1347,6 +1382,7 @@ export type ProductCreateWithoutLocalPurchaseItemsInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   companyRel?: Prisma.CompanyCreateNestedOneWithoutProductsInput
@@ -1374,6 +1410,7 @@ export type ProductUncheckedCreateWithoutLocalPurchaseItemsInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   orderProducts?: Prisma.OrderProductUncheckedCreateNestedManyWithoutProductInput
@@ -1412,6 +1449,7 @@ export type ProductUpdateWithoutLocalPurchaseItemsInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   companyRel?: Prisma.CompanyUpdateOneWithoutProductsNestedInput
@@ -1439,6 +1477,7 @@ export type ProductUncheckedUpdateWithoutLocalPurchaseItemsInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderProducts?: Prisma.OrderProductUncheckedUpdateManyWithoutProductNestedInput
@@ -1463,6 +1502,7 @@ export type ProductCreateManyCompanyRelInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1483,6 +1523,7 @@ export type ProductUpdateWithoutCompanyRelInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categoryRel?: Prisma.CategoryUpdateOneWithoutProductsNestedInput
@@ -1509,6 +1550,7 @@ export type ProductUncheckedUpdateWithoutCompanyRelInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderProducts?: Prisma.OrderProductUncheckedUpdateManyWithoutProductNestedInput
@@ -1534,6 +1576,7 @@ export type ProductUncheckedUpdateManyWithoutCompanyRelInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1556,6 +1599,7 @@ export type ProductCreateManyCategoryRelInput = {
   barcode?: string | null
   costPrice?: number | null
   profitMargin?: number | null
+  isHidden?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1576,6 +1620,7 @@ export type ProductUpdateWithoutCategoryRelInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   companyRel?: Prisma.CompanyUpdateOneWithoutProductsNestedInput
@@ -1602,6 +1647,7 @@ export type ProductUncheckedUpdateWithoutCategoryRelInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderProducts?: Prisma.OrderProductUncheckedUpdateManyWithoutProductNestedInput
@@ -1627,6 +1673,7 @@ export type ProductUncheckedUpdateManyWithoutCategoryRelInput = {
   barcode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profitMargin?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1699,6 +1746,7 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   barcode?: boolean
   costPrice?: boolean
   profitMargin?: boolean
+  isHidden?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   companyRel?: boolean | Prisma.Product$companyRelArgs<ExtArgs>
@@ -1728,6 +1776,7 @@ export type ProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   barcode?: boolean
   costPrice?: boolean
   profitMargin?: boolean
+  isHidden?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   companyRel?: boolean | Prisma.Product$companyRelArgs<ExtArgs>
@@ -1753,6 +1802,7 @@ export type ProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   barcode?: boolean
   costPrice?: boolean
   profitMargin?: boolean
+  isHidden?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   companyRel?: boolean | Prisma.Product$companyRelArgs<ExtArgs>
@@ -1778,11 +1828,12 @@ export type ProductSelectScalar = {
   barcode?: boolean
   costPrice?: boolean
   profitMargin?: boolean
+  isHidden?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "company" | "companyId" | "category" | "categoryId" | "price" | "originalPrice" | "retailPrice" | "consumerPrice" | "bulkPrice" | "bulkLimit" | "image" | "description" | "companyImage" | "barcode" | "costPrice" | "profitMargin" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "company" | "companyId" | "category" | "categoryId" | "price" | "originalPrice" | "retailPrice" | "consumerPrice" | "bulkPrice" | "bulkLimit" | "image" | "description" | "companyImage" | "barcode" | "costPrice" | "profitMargin" | "isHidden" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
 export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   companyRel?: boolean | Prisma.Product$companyRelArgs<ExtArgs>
   categoryRel?: boolean | Prisma.Product$categoryRelArgs<ExtArgs>
@@ -1828,6 +1879,7 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     barcode: string | null
     costPrice: number | null
     profitMargin: number | null
+    isHidden: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["product"]>
@@ -2276,6 +2328,7 @@ export interface ProductFieldRefs {
   readonly barcode: Prisma.FieldRef<"Product", 'String'>
   readonly costPrice: Prisma.FieldRef<"Product", 'Float'>
   readonly profitMargin: Prisma.FieldRef<"Product", 'Float'>
+  readonly isHidden: Prisma.FieldRef<"Product", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Product", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Product", 'DateTime'>
 }
