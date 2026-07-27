@@ -27,7 +27,7 @@ const Subnav: React.FC = () => {
               <p className="font-sifonn text-accents">Categories</p>
           </button>
         )}
-        <Link href="/companies">
+        <Link href="/companies" scroll={false}>
           <div className="flex flex-row gap-2 px-2 py-2 items-center">
               <img src="/images/brand.png" className="w-10 h-10"/>
               <p className="font-sifonn text-accents">Companies</p>

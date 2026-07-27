@@ -55,8 +55,17 @@ export default function Deals({Name, range, index, filterCategory}:DealsCardProp
     }
   };
 
-  if(loading){
-    return <Loading/>
+  if (loading && (!ProductFetch || ProductFetch.length === 0)) {
+    return (
+      <section className="py-4 px-5">
+        <div className="max-w-md lg:max-w-4xl md:max-w-2xl mx-auto">
+          <h2 className="font-sifonn text-xl md:text-3xl font-semibold text-slate-800 mb-6">
+            {Name}
+          </h2>
+          <Loading />
+        </div>
+      </section>
+    );
   }
 
   if(!rangedProducts || rangedProducts.length === 0){

@@ -17,20 +17,24 @@ export function ProductsProvider({children}:{children:React.ReactNode}) {
     const [products,setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchProducts = async () => {
-    try {
-      const res = await fetch("/api/products"); // GET request
-      const data = await res.json();
-      setProducts(data);
-    } catch (err) {
-      console.error("Failed to fetch products", err);
-    } finally {
-      setLoading(false);
-    }
-  };
   useEffect(() => {
-    fetchProducts();
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        if (!cancelled) setProducts(data);
+      } catch (err) {
+        console.error("Failed to fetch products", err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
   return (
     <ProductContext.Provider value={{products,setProducts, loading, ProductFetch: products, setProductFetch: setProducts}}>
         {children}

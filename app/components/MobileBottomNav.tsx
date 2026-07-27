@@ -48,13 +48,13 @@ const MobileBottomNav = () => {
   if (pathname === "/checkout") return null;
 
   const navItems = [
-    { key: "home", label: "Home", icon: <Home className="w-5 h-5" />, onClick: () => router.push("/") },
+    { key: "home", label: "Home", icon: <Home className="w-5 h-5" />, onClick: () => router.push("/", { scroll: false }) },
     {
       key: "profile",
       label: "Profile",
       icon: <UserCircle className="w-5 h-5" />,
       onClick: () => {
-        if (session) return router.push("/account");
+        if (session) return router.push("/account", { scroll: false });
         setIsEmployee(false);
         setIsOpen(true);
       },
@@ -64,7 +64,7 @@ const MobileBottomNav = () => {
       label: "Orders",
       icon: <ClipboardList className="w-5 h-5" />,
       onClick: () => {
-        if (session) return router.push("/orders");
+        if (session) return router.push("/orders", { scroll: false });
         setIsEmployee(false);
         setIsOpen(true);
       },

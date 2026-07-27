@@ -24,7 +24,8 @@ import { CategoryProvider } from "../context/categoriesContext";
 import { CompaniesProvider } from "../context/fetchCompanies";
 import { VendorProvider } from "../context/VendorContext";
 import VendorModal from "./VendorModal";
-import { useEffect, useRef } from "react";
+import KeepAliveOutlet from "./KeepAliveOutlet";
+import { useEffect } from "react";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -44,56 +45,28 @@ function ContentLayout({ children }: LayoutProps) {
   const isCartOpenOnDesktop = CartOpen && cartItems.length > 0;
 
   return (
-    <>
-      <div className="bg-slate-50 border-b border-slate-200 shadow-sm">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 bg-slate-50 border-b border-slate-200 shadow-sm">
         <Headband />
         <BulkToast />
         <Navbar />
         <Subnav />
       </div>
-      <div className="flex overflow-visible">
-        <div className={`flex-1 md:pt-0 pt-[56px] min-w-0 ${isCartOpenOnDesktop ? 'md:max-w-5xl' : ''}`}>{children}</div>
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <div
+          className={`min-h-0 min-w-0 flex-1 pt-[56px] pb-[56px] md:pt-0 md:pb-0 ${
+            isCartOpenOnDesktop ? "md:max-w-5xl" : ""
+          }`}
+        >
+          {children}
+        </div>
         <Cart />
       </div>
-    </>
+    </div>
   );
 }
 
 function SiteShell({ children }: LayoutProps) {
-  const ScrollRestorer = () => {
-    const pathname = usePathname();
-    const ticking = useRef(false);
-
-    useEffect(() => {
-      if (typeof window === "undefined") return;
-      const saved = sessionStorage.getItem(`scroll:${pathname}`);
-      if (saved) {
-        requestAnimationFrame(() => {
-          window.scrollTo(0, Number(saved));
-        });
-      }
-    }, [pathname]);
-
-    useEffect(() => {
-      if (typeof window === "undefined") return;
-      const onScroll = () => {
-        if (ticking.current) return;
-        ticking.current = true;
-        requestAnimationFrame(() => {
-          sessionStorage.setItem(`scroll:${pathname}`, String(window.scrollY));
-          ticking.current = false;
-        });
-      };
-      window.addEventListener("scroll", onScroll, { passive: true });
-      return () => {
-        window.removeEventListener("scroll", onScroll);
-        sessionStorage.setItem(`scroll:${pathname}`, String(window.scrollY));
-      };
-    }, [pathname]);
-
-    return null;
-  };
-
   return (
     <GoogleMapsProvider>
       <ProductsProvider>
@@ -105,15 +78,19 @@ function SiteShell({ children }: LayoutProps) {
                   <CartProvider>
                     <LocationProvider>
                       <UserInfoProvider>
-                        <ScrollRestorer />
-                        <ContentLayout>
-                          {children}
-                        </ContentLayout>
-                        <MobileBottomNav />
-                        <PendingOrdersBanner />
-                        <LoginModal />
-                        <VendorModal />
-                        <ProductModal />
+                        {/* Fixed viewport shell so keep-alive panes scroll internally */}
+                        <div className="flex h-dvh flex-col overflow-hidden">
+                          <div className="min-h-0 flex-1">
+                            <ContentLayout>
+                              <KeepAliveOutlet>{children}</KeepAliveOutlet>
+                            </ContentLayout>
+                          </div>
+                          <MobileBottomNav />
+                          <PendingOrdersBanner />
+                          <LoginModal />
+                          <VendorModal />
+                          <ProductModal />
+                        </div>
                       </UserInfoProvider>
                     </LocationProvider>
                   </CartProvider>

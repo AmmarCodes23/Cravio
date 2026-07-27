@@ -17,20 +17,24 @@ export function CompaniesProvider({children}:{children:React.ReactNode}) {
     const [companies,setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchCompanies = async () => {
-    try {
-      const res = await fetch("/api/company"); // GET request
-      const data = await res.json();
-      setCompanies(data);
-    } catch (err) {
-      console.error("Failed to fetch companies", err);
-    } finally {
-      setLoading(false);
-    }
-  };
   useEffect(() => {
-    fetchCompanies();
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/company");
+        const data = await res.json();
+        if (!cancelled) setCompanies(data);
+      } catch (err) {
+        console.error("Failed to fetch companies", err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
   return (
     <CompanyContext.Provider value={{companies,setCompanies, loading, CompaniesFetch: companies, setCompaniesFetch: setCompanies}}>
         {children}

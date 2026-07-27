@@ -20,7 +20,7 @@ export default function AllProductsGrid() {
     return Array.from(map.entries()).map(([category, items]) => ({ category, items }));
   }, [ProductFetch]);
 
-  if (loading) {
+  if (loading && (!ProductFetch || ProductFetch.length === 0)) {
     return <Loading />;
   }
 

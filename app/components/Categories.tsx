@@ -112,9 +112,9 @@ export default function Categories() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Disable browser scroll restoration (only once)
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
+    // Prefer browser restore for window scroll; Categories carousel uses sessionStorage
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "auto";
     }
 
     const handlePageShow = (event: PageTransitionEvent) => {
@@ -137,7 +137,6 @@ export default function Categories() {
         // Create restore function that will be called when emblaApi is ready
         if (savedScrollTransform && savedIndex !== null) {
           const index = parseInt(savedIndex, 10);
-          const shouldDisableTransitions = isNavigatingFromOtherPage.current;
           
           if (!isNaN(index)) {
             restoreFromBfcacheRef.current = () => {
@@ -149,73 +148,28 @@ export default function Categories() {
               
               // Mark as restored before attempting restoration
               hasRestoredFromBfcacheRef.current = true;
-              
-              // Wait for Embla to be fully ready (double RAF for mobile Safari)
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  const api = emblaApiRef.current;
-                  if (!api) return;
-                  
-                  const scrollSnaps = api.scrollSnapList();
-                  if (index < 0 || index >= scrollSnaps.length) return;
-                  
-                  const container = api.containerNode();
-                  const viewport = container?.parentElement;
-                  
-                  // Only disable transitions if navigating from another page
-                  if (shouldDisableTransitions) {
-                    if (container) {
-                      container.style.setProperty('transition', 'none', 'important');
-                      container.style.setProperty('transition-duration', '0ms', 'important');
-                    }
-                    if (viewport) {
-                      viewport.style.setProperty('transition', 'none', 'important');
-                      viewport.style.setProperty('transition-duration', '0ms', 'important');
-                    }
-                  }
-                  
-                  // Restore position using scrollTo
-                  if (shouldDisableTransitions && container && savedScrollTransform) {
-                    container.style.transform = savedScrollTransform;
-                  }
-                  
-                  // Use scrollTo to sync Embla's state
-                  api.scrollTo(index, !shouldDisableTransitions);
-                  
-                  if (shouldDisableTransitions && container && savedScrollTransform) {
-                    container.style.transform = savedScrollTransform;
-                    requestAnimationFrame(() => {
-                      if (container) container.style.transform = savedScrollTransform;
-                    });
-                  }
-                  
-                  // Sync state manually
-                  setSelectedIndex(index);
-                  
-                  // Re-enable transitions if disabled
-                  if (shouldDisableTransitions) {
-                    requestAnimationFrame(() => {
-                      requestAnimationFrame(() => {
-                        if (container) {
-                          container.style.removeProperty('transition');
-                          container.style.removeProperty('transition-duration');
-                        }
-                        if (viewport) {
-                          viewport.style.removeProperty('transition');
-                          viewport.style.removeProperty('transition-duration');
-                        }
-                      });
-                    });
-                  }
-                });
-              });
+
+              const container = api.containerNode();
+              const viewport = container?.parentElement;
+              if (container) {
+                container.style.setProperty("transition", "none", "important");
+                container.style.setProperty("transition-duration", "0ms", "important");
+                if (savedScrollTransform) container.style.transform = savedScrollTransform;
+              }
+              if (viewport) {
+                viewport.style.setProperty("transition", "none", "important");
+                viewport.style.setProperty("transition-duration", "0ms", "important");
+              }
+
+              if (index >= 0 && index < api.scrollSnapList().length) {
+                api.scrollTo(index, true); // jump — no animation
+                if (container && savedScrollTransform) {
+                  container.style.transform = savedScrollTransform;
+                }
+              }
+              setSelectedIndex(index);
+              isInitialMount.current = false;
             };
-            
-            // Try to restore immediately if emblaApi is already ready
-            if (emblaApiRef.current) {
-              restoreFromBfcacheRef.current?.();
-              restoreFromBfcacheRef.current = null;
-            }
           }
         }
       }
@@ -281,98 +235,72 @@ export default function Categories() {
   
   document.addEventListener('visibilitychange', handleVisibilityChange);
   
-  // Restore saved scroll position directly on initial mount
+  // Restore saved carousel position on remount (soft nav / swipe-back) — always jump, never animate
   if (isInitialMount.current && typeof window !== "undefined") {
     const savedScrollTransform = sessionStorage.getItem("categories-scroll-transform");
     const savedIndex = sessionStorage.getItem("categories-selected-index");
     
-    if (savedScrollTransform && savedIndex !== null) {
+    if (savedIndex !== null) {
       const index = parseInt(savedIndex, 10);
       
       if (!isNaN(index)) {
-        // Check if we're navigating from another page
-        const shouldDisableTransitions = isNavigatingFromOtherPage.current;
-        
-        // Wait for Embla to initialize, then restore scroll position
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             const container = emblaApi.containerNode();
             const viewport = container?.parentElement;
             
-            // Only disable transitions if navigating from another page
-            if (shouldDisableTransitions) {
-              if (container) {
-                container.style.setProperty('transition', 'none', 'important');
-                container.style.setProperty('transition-duration', '0ms', 'important');
-              }
-              
-              if (viewport) {
-                viewport.style.setProperty('transition', 'none', 'important');
-                viewport.style.setProperty('transition-duration', '0ms', 'important');
-              }
+            if (container) {
+              container.style.setProperty('transition', 'none', 'important');
+              container.style.setProperty('transition-duration', '0ms', 'important');
+            }
+            if (viewport) {
+              viewport.style.setProperty('transition', 'none', 'important');
+              viewport.style.setProperty('transition-duration', '0ms', 'important');
             }
             
-            // Temporarily remove event listeners to prevent saving during restoration
             emblaApi.off("select", handleSelect);
             emblaApi.off("scroll", handleScroll);
             
-            // Use scrollTo to restore position and sync Embla's internal state
+            if (savedScrollTransform && container) {
+              container.style.transform = savedScrollTransform;
+            }
+
             if (index >= 0 && index < emblaApi.scrollSnapList().length) {
-              // If navigating from another page, restore transform first to prevent animation
-              if (shouldDisableTransitions && container && savedScrollTransform) {
+              emblaApi.scrollTo(index, true); // jump — no bounce
+              if (savedScrollTransform && container) {
                 container.style.transform = savedScrollTransform;
-              }
-              
-              // scrollTo will sync Embla's state
-              emblaApi.scrollTo(index, !shouldDisableTransitions); // Use animation if not navigating
-              
-              // If navigating from another page, restore transform after scrollTo to prevent visual change
-              if (shouldDisableTransitions && container && savedScrollTransform) {
-                container.style.transform = savedScrollTransform;
-                requestAnimationFrame(() => {
-                  if (container) container.style.transform = savedScrollTransform;
-                });
               }
             }
             
-            // Sync state manually
             setSelectedIndex(index);
             
-            // Re-attach event listeners
             emblaApi.on("select", handleSelect);
             emblaApi.on("scroll", handleScroll);
             
-            // Re-enable transitions if they were disabled
-            if (shouldDisableTransitions) {
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  if (container) {
-                    container.style.removeProperty('transition');
-                    container.style.removeProperty('transition-duration');
-                  }
-                  if (viewport) {
-                    viewport.style.removeProperty('transition');
-                    viewport.style.removeProperty('transition-duration');
-                  }
-                  // Mark initial mount as complete after everything is set up
-                  isInitialMount.current = false;
-                });
-              });
-            } else {
-              // Mark initial mount as complete immediately if no transition disabling
+            requestAnimationFrame(() => {
+              if (container) {
+                container.style.removeProperty('transition');
+                container.style.removeProperty('transition-duration');
+              }
+              if (viewport) {
+                viewport.style.removeProperty('transition');
+                viewport.style.removeProperty('transition-duration');
+              }
               isInitialMount.current = false;
-            }
+            });
           });
         });
-        return;
+        return () => {
+          emblaApi.off("select", handleSelect);
+          emblaApi.off("scroll", handleScroll);
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
       }
     }
     
-    // No saved state on initial mount, mark as complete
     isInitialMount.current = false;
   }
   
-  // Sync current state (only if not initial mount with saved state)
   if (!isInitialMount.current) {
     handleSelect();
   }
@@ -393,9 +321,9 @@ export default function Categories() {
     if (!CategoryFetched) return [];
     if (showAll) return CategoryFetched;
     if (typeof window !== "undefined" && window.innerWidth >= 768) {
-      return CategoryFetched.slice(0, 8); // ~2 rows on desktop
+      return CategoryFetched.slice(0, 10); // 2 rows on desktop (5 cols)
     }
-    return CategoryFetched.slice(0, 4); // ~2 rows on mobile/tablet
+    return CategoryFetched.slice(0, 6); // 2 rows on mobile (3 cols)
   };
 
   const getVisibleCompanies = () => {
@@ -474,14 +402,14 @@ export default function Categories() {
     
     if (activeSlide && typeof window !== 'undefined' && window.ResizeObserver) {
       resizeObserver = new ResizeObserver(() => {
-        // Don't use instant for resize events after initial mount
-        updateHeight(false);
+        // Instant — animated height on keep-alive show causes window scroll jumps
+        updateHeight(true);
       });
       resizeObserver.observe(activeSlide);
     }
     
     // Fallback for browsers without ResizeObserver
-    const handleResize = () => updateHeight(false);
+    const handleResize = () => updateHeight(true);
     window.addEventListener('resize', handleResize);
     
     return () => {
@@ -527,16 +455,16 @@ export default function Categories() {
         </div>
 
         {/* Carousel Container */}
-        <div className={`relative w-full py-4 mx-auto px-0 sm:px-4 ${isInitialMount.current && isNavigatingFromOtherPage.current ? '[&_*]:!transition-none [&_*]:!duration-0' : ''}`}>
+        <div className={`relative w-full py-4 mx-auto px-0 sm:px-4 ${isInitialMount.current ? '[&_*]:!transition-none [&_*]:!duration-0' : ''}`}>
           {/* Carousel Viewport */}
           <div 
             className="overflow-hidden"
-            style={isInitialMount.current && isNavigatingFromOtherPage.current ? { transition: 'none', transitionDuration: '0ms' } : undefined}
+            style={isInitialMount.current ? { transition: 'none', transitionDuration: '0ms' } : undefined}
             ref={(node) => {
               emblaRef(node);
               viewportRef.current = node;
-              // Only disable transitions if navigating from another page
-              if (node && isInitialMount.current && isNavigatingFromOtherPage.current && typeof window !== "undefined") {
+              // Disable transitions on remount restore so carousel does not bounce
+              if (node && isInitialMount.current && typeof window !== "undefined") {
                 node.style.setProperty('transition', 'none', 'important');
                 node.style.setProperty('transition-duration', '0ms', 'important');
                 
@@ -566,33 +494,33 @@ export default function Categories() {
               }
             }}
           >
-            <div className="flex items-start" style={isInitialMount.current && isNavigatingFromOtherPage.current ? { transition: 'none', transitionDuration: '0ms' } : undefined}>
+            <div className="flex items-start" style={isInitialMount.current ? { transition: 'none', transitionDuration: '0ms' } : undefined}>
               {/* Categories Slide */}
               <div ref={categoriesSlideRef} className="flex-[0_0_100%] min-w-0 px-1 self-start">
-                <div className="flex flex-wrap gap-3 md:gap-10 md:px-10 content-start">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 md:gap-3.5 justify-items-center">
                   {visibleCategories?visibleCategories.map((category, index) => (
                     <Link
                       href={`/category/${category.name}`}
                       key={index}
+                      scroll={false}
+                      className="w-full flex flex-col items-center gap-2 group"
                     >
-                      <div className="group flex flex-col items-center gap-2 w-20 md:w-24">
-                        <div className="relative overflow-hidden w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center">
+                      <div className="relative overflow-hidden w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center">
                           <img
                             src={category.url}
                             alt={category.name}
                             className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                           />
-                        </div>
-                        <div className="text-center">
-                          <p className="font-sifonn text-sm md:text-base font-semibold text-slate-800 group-hover:text-primary transition-colors duration-300 leading-snug">
-                            {category.name}
+                      </div>
+                      <div className="text-center w-full px-0.5">
+                        <p className="font-sifonn text-sm md:text-base font-semibold text-slate-800 group-hover:text-primary transition-colors duration-300 leading-snug line-clamp-2">
+                          {category.name}
+                        </p>
+                        {!showAll && (
+                          <p className="text-[11px] md:text-xs text-muted-foreground mt-0.5">
+                            {category.productCount} items
                           </p>
-                          {!showAll && (
-                            <p className="text-[11px] md:text-xs text-muted-foreground mt-0.5">
-                              {category.productCount} items
-                            </p>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </Link>
                   )):null}
@@ -611,22 +539,20 @@ export default function Categories() {
 
               {/* Companies Slide */}
                 <div ref={companiesSlideRef} className="flex-[0_0_100%] min-w-0 px-1 self-start">
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 md:gap-3.5">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 md:gap-3.5 justify-items-center">
                     {visibleCompanies?visibleCompanies.map((company: Company, index:number) => (
                       <Link
                         href={`/companies/${company.name.toLowerCase().replace(/\s+/g, '-')}`}
                         key={index}
+                        scroll={false}
                         className="flex-shrink-0"
                       >
-                        <div className="group flex flex-col items-center gap-2">
+                        <div className="relative overflow-hidden w-24 h-24 md:w-28 md:h-28 rounded-2xl flex-col items-center justify-center">
                             <img
                               src={company.image ?? "/images/dummyimage.png"}
                               alt={company.name}
-                            className="w-16 h-16 md:w-18 md:h-18 object-contain group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                             />
-                          <p className="font-sifonn text-sm md:text-base font-semibold text-slate-800 group-hover:text-primary transition-colors duration-300 text-center line-clamp-2">
-                              {company.name}
-                            </p>
                         </div>
                       </Link>
                     )):null}

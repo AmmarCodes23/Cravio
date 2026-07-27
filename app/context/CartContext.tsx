@@ -123,6 +123,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         : [...list, { product, quantity: clampQuantity(quantity) }];
       return { ...prev, [key]: nextList };
     });
+    // Desktop side cart only shows when CartOpen is true
+    setCartOpen(true);
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       setBanner(product.name);
       if (bannerTimeout.current) clearTimeout(bannerTimeout.current);

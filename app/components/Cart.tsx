@@ -128,7 +128,7 @@ const Cart: React.FC = () => {
     <aside
       className={`${
         cartItems.length === 0 || !CartOpen ? "hidden" : "hidden md:flex"
-      } md:flex-col md:sticky md:top-0 md:self-start md:h-screen w-[420px] bg-white shadow-2xl z-50`}
+      } md:flex-col md:h-full md:self-stretch w-[420px] shrink-0 bg-white shadow-2xl z-50`}
     >
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-100 bg-white">

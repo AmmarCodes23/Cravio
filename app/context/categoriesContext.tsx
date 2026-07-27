@@ -13,21 +13,26 @@ const CategoryContext = createContext<CategoryValue | null>(null);
 
 export function CategoryProvider({children}:{children:React.ReactNode}) {
     const [categories,setCategories] = useState<CategoryFetch[] | null>(null);
-    const fetchProducts = async () => {
-    try {
-      const res = await fetch("/api/category"); // GET request
-      const data = await res.json();
-      setCategories(data);
-    } catch (err) {
-      console.error("Failed to fetch products", err);
-    }
-  };
+
   useEffect(() => {
-    fetchProducts();
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/category");
+        const data = await res.json();
+        if (!cancelled) setCategories(data);
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
   return (
     <CategoryContext.Provider value={{categories,setCategories, CategoryFetched: categories, setCategoryFetched: setCategories}}>
-        {children}
+    {children}
     </CategoryContext.Provider>
   )
 }

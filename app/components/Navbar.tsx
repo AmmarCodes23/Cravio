@@ -178,7 +178,7 @@ const Navbar: React.FC = () => {
 
         {/* ===== DESKTOP NAVBAR (md+) ===== */}
         <div className="hidden md:flex flex-row justify-between py-3 px-5 items-center gap-5 w-full">
-          <Link href={"/"}>
+          <Link href={"/"} scroll={false}>
             <div className="flex flex-row md:gap-5 gap-2 w-fit flex-none">
               <img src="/images/Cravio_Logo.png" className="w-15 sm:w-20 h-auto rounded-sm md:rounded-lg lg:rounded-xl"/>
               <p className="self-center font-brasika text-primary hidden sm:text-sm md:block md:text-lg lg:text-2xl">Cravio</p>
