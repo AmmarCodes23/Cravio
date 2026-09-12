@@ -1,5 +1,5 @@
 import { CompanyProductsClient } from "./CompanyProductsClient";
-import { companySlug, getCompanies, getProducts, normalizeSlug } from "@/lib/catalog";
+import { companySlug, getCompanies, getCompanyPageData } from "@/lib/catalog";
 
 export const revalidate = 300;
 
@@ -20,22 +20,13 @@ export default async function CompanyProductsPage({
   params: Promise<{ companydata: string }>;
 }) {
   const { companydata } = await params;
-  const normalizedSlug = normalizeSlug(companydata);
-
-  const [products, companies] = await Promise.all([getProducts(), getCompanies()]);
-
-  const company =
-    companies.find((c) => normalizeSlug(c.name) === normalizedSlug) ?? null;
-
-  const companyProducts = products.filter(
-    (product) => normalizeSlug(product.company) === normalizedSlug
-  );
+  const { company, products } = await getCompanyPageData(companydata);
 
   return (
     <CompanyProductsClient
       companyName={companydata}
       company={company}
-      products={companyProducts}
+      products={products}
     />
   );
 }

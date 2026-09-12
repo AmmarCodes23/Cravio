@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
-import { revalidateCatalog } from "@/lib/catalog";
+import { ensureCompanyCategoryLink, revalidateCatalog } from "@/lib/catalog";
 
 const parseNullableNumber = (value: unknown) => {
   if (value === undefined) return undefined;
@@ -181,6 +181,8 @@ export async function PATCH(
       where: { id: productId },
       data,
     });
+
+    await ensureCompanyCategoryLink(updated.companyId, updated.categoryId);
 
     revalidateCatalog();
     return NextResponse.json(updated);

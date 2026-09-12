@@ -1,10 +1,12 @@
 "use client";
 
 import Image, { type ImageProps } from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const FALLBACK = "/images/dummyimage.png";
-const DEAD_HOSTS = ["admin.dealcart.io", "dealcart.io"];
+
+/** Hosts that should never go through `/_next/image` (dead / unreliable origins). */
+const NO_OPTIMIZE_HOSTS = ["admin.dealcart.io", "dealcart.io"];
 
 function hostnameOf(src: string) {
   try {
@@ -14,23 +16,20 @@ function hostnameOf(src: string) {
   }
 }
 
-function resolveSrc(src: string) {
-  const host = hostnameOf(src);
-  if (host && DEAD_HOSTS.some((dead) => host === dead || host.endsWith(`.${dead}`))) {
-    return FALLBACK;
-  }
-  return src;
-}
-
 function canOptimize(src: string) {
   if (src.startsWith("/")) return true;
   const hostname = hostnameOf(src);
   if (!hostname) return false;
-  return (
-    hostname === "cdn.craviopk.com" ||
-    hostname.endsWith(".craviopk.com") ||
-    hostname === "lh3.googleusercontent.com"
-  );
+  if (NO_OPTIMIZE_HOSTS.some((dead) => hostname === dead || hostname.endsWith(`.${dead}`))) {
+    return false;
+  }
+  // Cravio CDN serves files as application/octet-stream. Routing them through
+  // `/_next/image` is slow and often fails, then retries the original — double work.
+  // Let the browser fetch CDN URLs directly.
+  if (hostname === "cdn.craviopk.com" || hostname.endsWith(".craviopk.com")) {
+    return false;
+  }
+  return hostname === "lh3.googleusercontent.com";
 }
 
 type CatalogImageProps = Omit<ImageProps, "src"> & {
@@ -44,13 +43,18 @@ export default function CatalogImage({
   unoptimized,
   ...rest
 }: CatalogImageProps) {
-  const incoming = resolveSrc(src?.trim() ? src.trim() : FALLBACK);
+  const incoming = src?.trim() ? src.trim() : FALLBACK;
   const [current, setCurrent] = useState(incoming);
-  const [skipOptimizer, setSkipOptimizer] = useState(false);
+  const [skipOptimizer, setSkipOptimizer] = useState(() => !canOptimize(incoming));
+  const mountedRef = useRef(true);
 
   useEffect(() => {
+    mountedRef.current = true;
     setCurrent(incoming);
-    setSkipOptimizer(false);
+    setSkipOptimizer(!canOptimize(incoming));
+    return () => {
+      mountedRef.current = false;
+    };
   }, [incoming]);
 
   const optimize = Boolean(unoptimized) ? false : canOptimize(current) && !skipOptimizer;
@@ -63,12 +67,17 @@ export default function CatalogImage({
       alt={alt}
       unoptimized={!optimize}
       onError={(event) => {
+        // Ignore errors from unmounted / remounted nodes (common in large grids).
+        if (!mountedRef.current) return;
         if (current === FALLBACK) return;
+
         // Optimizer (or a cancelled first load) failed — retry the original file next.
         if (optimize) {
           setSkipOptimizer(true);
           return;
         }
+
+        // Only swap to dummy after a failed direct (unoptimized) load.
         setCurrent(FALLBACK);
         onError?.(event);
       }}

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
 import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
-import { CATALOG_CACHE_CONTROL, getProducts, revalidateCatalog } from "@/lib/catalog";
+import { CATALOG_CACHE_CONTROL, ensureCompanyCategoryLink, getProducts, revalidateCatalog } from "@/lib/catalog";
 
 type ProductInput = {
   name?: string;
@@ -231,15 +231,19 @@ export async function POST(request: Request) {
             });
 
             if (existingProduct) {
-              return prisma.product.update({
+              const updated = await prisma.product.update({
                 where: { id: existingProduct.id },
                 data: productData,
               });
+              await ensureCompanyCategoryLink(company.id, category.id);
+              return updated;
             }
 
-            return prisma.product.create({
+            const created = await prisma.product.create({
               data: productData,
             });
+            await ensureCompanyCategoryLink(company.id, category.id);
+            return created;
           } catch (error) {
             console.error(`Error processing row: ${row.join(",")}`, error);
             return null;
@@ -277,7 +281,17 @@ export async function POST(request: Request) {
     const products = await Promise.all(
       payloads.map(async (productInput) => {
         const data = await buildProductData(productInput);
-        return prisma.product.create({ data });
+        const created = await prisma.product.create({ data });
+        const companyId =
+          typeof productInput.companyId !== "undefined"
+            ? Number(productInput.companyId)
+            : created.companyId;
+        const categoryId =
+          typeof productInput.categoryId !== "undefined"
+            ? Number(productInput.categoryId)
+            : created.categoryId;
+        await ensureCompanyCategoryLink(companyId, categoryId);
+        return created;
       })
     );
 

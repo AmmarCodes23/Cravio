@@ -1,4 +1,9 @@
-import { getCategories, getCompanies, getProducts } from "@/lib/catalog";
+import {
+  companiesPresentInProducts,
+  getCompanies,
+  getCategories,
+  getProducts,
+} from "@/lib/catalog";
 import CategoryProductsClient from "./CategoryProductsClient";
 
 export const revalidate = 300;
@@ -19,25 +24,20 @@ export default async function CategoryPage({
 }) {
   const { categoryName } = await params;
   const decodedCategoryName = decodeURIComponent(categoryName);
-  const categorySlug = decodedCategoryName.toLowerCase();
 
   const [products, companies] = await Promise.all([getProducts(), getCompanies()]);
 
   const categoryProducts = products.filter(
-    (product) => product.category === decodedCategoryName && !product.isHidden
+    (product) =>
+      product.category.toLowerCase() === decodedCategoryName.toLowerCase() &&
+      !product.isHidden
   );
 
-  const companiesForCategory = companies
-    .filter((company) => {
-      if (company.isHidden) return false;
-      if (Array.isArray(company.categories) && company.categories.length > 0) {
-        return company.categories.some(
-          (cat) => cat?.toLowerCase() === categorySlug
-        );
-      }
-      return company.category?.toLowerCase() === categorySlug;
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+  // Chips = companies that actually have products in this category (not M2M alone).
+  const companiesForCategory = companiesPresentInProducts(
+    companies,
+    categoryProducts
+  );
 
   return (
     <CategoryProductsClient

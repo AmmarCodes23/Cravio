@@ -24,6 +24,7 @@ import { CategoryProvider } from "../context/categoriesContext";
 import { CompaniesProvider } from "../context/fetchCompanies";
 import { VendorProvider } from "../context/VendorContext";
 import VendorModal from "./VendorModal";
+import NavigationPending from "./NavigationPending";
 import { useEffect, useLayoutEffect, useRef } from "react";
 
 type LayoutProps = {
@@ -97,6 +98,7 @@ function SiteShell({ children }: LayoutProps) {
                     <UserInfoProvider>
                       <div className="flex min-h-dvh flex-col">
                         <ContentLayout>{children}</ContentLayout>
+                        <NavigationPending />
                         <MobileBottomNav />
                         <PendingOrdersBanner />
                         <LoginModal />

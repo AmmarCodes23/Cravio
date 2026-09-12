@@ -6,7 +6,15 @@ import { Product } from "@/app/Data/database";
 import { useSession } from "next-auth/react";
 import CatalogImage from "./CatalogImage";
 
-const ProductCard = ({ product, dest }: { product: Product; dest: string }) => {
+const ProductCard = ({
+  product,
+  dest,
+  priority = false,
+}: {
+  product: Product;
+  dest: string;
+  priority?: boolean;
+}) => {
   // Client-side hooks live here
   const { setProduct, setIsOpen } = useProductModal();
   const { addItem } = useCartContext();
@@ -41,6 +49,7 @@ const ProductCard = ({ product, dest }: { product: Product; dest: string }) => {
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 16vw"
               className="object-cover group-hover:scale-105 transition-transform duration-300"
+              priority={priority}
             />
           </div>
           <button
