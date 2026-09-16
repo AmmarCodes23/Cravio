@@ -1,4 +1,4 @@
-import { unstable_cache, revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import type { CategoryFetch, Company, Product } from "@/app/Data/database";
 
@@ -54,6 +54,9 @@ export function normalizeSlug(slug: string) {
 
 export function revalidateCatalog() {
   revalidateTag(CATALOG_TAG);
+  // ISR pages (home / category / company) otherwise keep serving the previous
+  // product image URLs for up to `revalidate` seconds.
+  revalidatePath("/", "layout");
 }
 
 /**

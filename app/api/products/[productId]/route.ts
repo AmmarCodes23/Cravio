@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
 import { ensureCompanyCategoryLink, revalidateCatalog } from "@/lib/catalog";
+import { nextStoredImage } from "@/lib/product-image";
 
 const parseNullableNumber = (value: unknown) => {
   if (value === undefined) return undefined;
@@ -136,7 +137,11 @@ export async function PATCH(
     }
 
     if (body.image !== undefined) {
-      data.image = body.image || "/images/dummyimage.png";
+      const existing = await prisma.product.findUnique({
+        where: { id: productId },
+        select: { image: true },
+      });
+      data.image = nextStoredImage(body.image, existing?.image);
     }
 
     if (body.description !== undefined) {

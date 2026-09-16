@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { ensureStaffOrPosApiKey } from "@/lib/pos-or-admin-auth";
+import {
+  contentTypeFromFileName,
+  sniffImageContentType,
+} from "@/lib/product-image";
 
 export async function POST(request: Request) {
   try {
@@ -26,22 +30,48 @@ export async function POST(request: Request) {
       );
     }
 
-    const key = `${Date.now()}-${crypto.randomUUID()}-${file.name}`.replace(
-      /[^a-zA-Z0-9._-]/g,
-      "_"
-    );
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const sniffed = sniffImageContentType(buffer);
+    const fromName = contentTypeFromFileName(file.name);
+    const contentType = sniffed || fromName || file.type || "";
 
-    // Forward to worker to perform the actual R2 put
+    if (contentType === "image/heic" || contentType === "image/heif") {
+      return NextResponse.json(
+        {
+          error:
+            "HEIC photos are not supported on the website. Please upload a JPG, PNG, or WebP.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!contentType.startsWith("image/")) {
+      return NextResponse.json(
+        { error: "File is not a supported image (JPG, PNG, WebP, GIF)" },
+        { status: 400 }
+      );
+    }
+
+    const ext =
+      contentType === "image/png"
+        ? "png"
+        : contentType === "image/webp"
+          ? "webp"
+          : contentType === "image/gif"
+            ? "gif"
+            : "jpg";
+
+    const safeBase = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").replace(/\.[^.]+$/, "");
+    const key = `${Date.now()}-${crypto.randomUUID()}-${safeBase}.${ext}`;
+
     const upstream = new FormData();
     upstream.append(
       "file",
-      new Blob([Buffer.from(await file.arrayBuffer())], {
-        type: file.type || "application/octet-stream",
-      }),
-      file.name
+      new Blob([buffer], { type: contentType }),
+      `${safeBase}.${ext}`
     );
     upstream.append("key", key);
-    upstream.append("contentType", file.type || "application/octet-stream");
+    upstream.append("contentType", contentType);
 
     const workerRes = await fetch(workerUrl, {
       method: "POST",
@@ -72,4 +102,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

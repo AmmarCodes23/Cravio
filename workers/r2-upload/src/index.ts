@@ -42,19 +42,31 @@ const handler = {
         ? keyOverride
         : `${Date.now()}-${crypto.randomUUID()}-${file.name}`.replace(/[^a-zA-Z0-9._-]/g, "_");
 
-    const contentType =
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let contentType =
       typeof contentTypeOverride === "string" && contentTypeOverride.length > 0
         ? contentTypeOverride
         : file.type || "application/octet-stream";
 
-        const buffer = await file.arrayBuffer();
+    if (!contentType.startsWith("image/")) {
+      if (bytes[0] === 0x89 && bytes[1] === 0x50) contentType = "image/png";
+      else if (bytes[0] === 0xff && bytes[1] === 0xd8) contentType = "image/jpeg";
+      else if (bytes[0] === 0x47 && bytes[1] === 0x49) contentType = "image/gif";
+      else if (
+        bytes.length >= 12 &&
+        String.fromCharCode(bytes[8], bytes[9], bytes[10], bytes[11]) === "WEBP"
+      ) {
+        contentType = "image/webp";
+      }
+    }
 
-        await env.BUCKET.put(key, buffer, {
-          httpMetadata: {
-            contentType,
-            cacheControl: "public, max-age=31536000, immutable",
-          },
-        });
+    await env.BUCKET.put(key, buffer, {
+      httpMetadata: {
+        contentType,
+        cacheControl: "public, max-age=31536000, immutable",
+      },
+    });
 
     const publicBase = env.PUBLIC_BASE_URL || "";
     const publicUrl = publicBase.endsWith("/")

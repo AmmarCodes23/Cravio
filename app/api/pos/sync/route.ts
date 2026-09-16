@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { revalidateCatalog } from "@/lib/catalog";
+import { nextStoredImage } from "@/lib/product-image";
 
 /**
  * POS sync endpoint: returns products, categories, companies, and optionally
@@ -283,10 +285,12 @@ export async function POST(request: Request) {
               ? { bulkPrice: Number(p.bulkPrice) }
               : {}),
             ...(p.bulkLimit !== undefined ? { bulkLimit: p.bulkLimit } : {}),
-            ...(p.image !== undefined ? { image: p.image || "/images/dummyimage.png" } : {}),
+            ...(p.image !== undefined
+              ? { image: nextStoredImage(p.image, existing.image) }
+              : {}),
             ...(p.description !== undefined ? { description: p.description } : {}),
             ...(p.companyImage !== undefined
-              ? { companyImage: p.companyImage || "/images/dummyimage.png" }
+              ? { companyImage: nextStoredImage(p.companyImage, existing.companyImage) }
               : {}),
             ...(nextBarcode !== undefined ? { barcode: nextBarcode } : {}),
             ...(p.costPrice !== undefined
@@ -400,6 +404,7 @@ export async function POST(request: Request) {
       salesCreated.push({ id: sale.id, name: saleLabel });
     }
 
+    revalidateCatalog();
     return NextResponse.json({
       ok: true,
       localSalesCreated: localSales.length,

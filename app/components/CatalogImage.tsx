@@ -2,34 +2,12 @@
 
 import Image, { type ImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { PLACEHOLDER_IMAGE, sniffImageContentType } from "@/lib/product-image";
 
-const FALLBACK = "/images/dummyimage.png";
+const FALLBACK = PLACEHOLDER_IMAGE;
 
-/** Hosts that should never go through `/_next/image` (dead / unreliable origins). */
-const NO_OPTIMIZE_HOSTS = ["admin.dealcart.io", "dealcart.io"];
-
-function hostnameOf(src: string) {
-  try {
-    return new URL(src).hostname;
-  } catch {
-    return null;
-  }
-}
-
-function canOptimize(src: string) {
-  if (src.startsWith("/")) return true;
-  const hostname = hostnameOf(src);
-  if (!hostname) return false;
-  if (NO_OPTIMIZE_HOSTS.some((dead) => hostname === dead || hostname.endsWith(`.${dead}`))) {
-    return false;
-  }
-  // Cravio CDN serves files as application/octet-stream. Routing them through
-  // `/_next/image` is slow and often fails, then retries the original — double work.
-  // Let the browser fetch CDN URLs directly.
-  if (hostname === "cdn.craviopk.com" || hostname.endsWith(".craviopk.com")) {
-    return false;
-  }
-  return hostname === "lh3.googleusercontent.com";
+function isRemote(src: string) {
+  return src.startsWith("http://") || src.startsWith("https://");
 }
 
 type CatalogImageProps = Omit<ImageProps, "src"> & {
@@ -41,46 +19,92 @@ export default function CatalogImage({
   alt,
   onError,
   unoptimized,
+  className,
+  fill,
+  sizes,
+  priority,
   ...rest
 }: CatalogImageProps) {
   const incoming = src?.trim() ? src.trim() : FALLBACK;
   const [current, setCurrent] = useState(incoming);
-  const [skipOptimizer, setSkipOptimizer] = useState(() => !canOptimize(incoming));
+  const blobTriedRef = useRef(false);
+  const blobUrlRef = useRef<string | null>(null);
   const mountedRef = useRef(true);
 
   useEffect(() => {
     mountedRef.current = true;
+    blobTriedRef.current = false;
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    }
     setCurrent(incoming);
-    setSkipOptimizer(!canOptimize(incoming));
     return () => {
       mountedRef.current = false;
     };
   }, [incoming]);
 
-  const optimize = Boolean(unoptimized) ? false : canOptimize(current) && !skipOptimizer;
+  const handleError: React.ReactEventHandler<HTMLImageElement> = (event) => {
+    if (!mountedRef.current) return;
+    if (current === FALLBACK) return;
+
+    // CDN objects are often application/octet-stream. <img> may fail; refetch
+    // and re-tag as a real image/* blob so Safari/Chrome will paint it.
+    if (isRemote(incoming) && !blobTriedRef.current) {
+      blobTriedRef.current = true;
+      void (async () => {
+        try {
+          const res = await fetch(incoming);
+          if (!res.ok) throw new Error("fetch failed");
+          const bytes = new Uint8Array(await res.arrayBuffer());
+          const type = sniffImageContentType(bytes);
+          if (!type || type === "image/heic") throw new Error("unsupported");
+          const blobUrl = URL.createObjectURL(new Blob([bytes], { type }));
+          blobUrlRef.current = blobUrl;
+          if (mountedRef.current) setCurrent(blobUrl);
+        } catch {
+          if (mountedRef.current) {
+            setCurrent(FALLBACK);
+            onError?.(event);
+          }
+        }
+      })();
+      return;
+    }
+
+    setCurrent(FALLBACK);
+    onError?.(event);
+  };
+
+  const useNativeImg =
+    isRemote(current) || current.startsWith("blob:") || Boolean(unoptimized);
+
+  if (useNativeImg) {
+    const fillClass = fill ? "absolute inset-0 h-full w-full" : "";
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={current}
+        alt={alt}
+        sizes={sizes}
+        className={[fillClass, className].filter(Boolean).join(" ")}
+        onError={handleError}
+        decoding="async"
+        {...(priority ? { fetchPriority: "high" as const } : {})}
+      />
+    );
+  }
 
   return (
     <Image
       {...rest}
-      key={`${current}:${optimize ? "opt" : "raw"}`}
+      fill={fill}
+      sizes={sizes}
+      priority={priority}
+      className={className}
       src={current}
       alt={alt}
-      unoptimized={!optimize}
-      onError={(event) => {
-        // Ignore errors from unmounted / remounted nodes (common in large grids).
-        if (!mountedRef.current) return;
-        if (current === FALLBACK) return;
-
-        // Optimizer (or a cancelled first load) failed — retry the original file next.
-        if (optimize) {
-          setSkipOptimizer(true);
-          return;
-        }
-
-        // Only swap to dummy after a failed direct (unoptimized) load.
-        setCurrent(FALLBACK);
-        onError?.(event);
-      }}
+      onError={handleError}
     />
   );
 }
