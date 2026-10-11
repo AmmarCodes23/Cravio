@@ -1,89 +1,50 @@
-"use client"
-import { useEffect, useMemo, useState } from "react";
-import { GoogleMap, Marker } from "@react-google-maps/api"
-import usePlacesAutocomplete, {getGeocode, getLatLng} from "use-places-autocomplete";
-import {Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption} from "@reach/combobox"
+"use client";
+import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxPopover,
+  ComboboxList,
+  ComboboxOption,
+} from "@reach/combobox";
 import { useLocation } from "../context/LocationContext";
-import { GoogleMapsProvider, useGoogleMaps } from "../context/GoogleMapsProvider";
-import "@reach/combobox/styles.css"
+import "@reach/combobox/styles.css";
 import { useSession } from "next-auth/react";
 import { useUserInfo } from "../context/UserInfoContext";
-import Loading from "./Loading";
 import type {
   AddressDisplayProps,
   LocationSelectorProps,
   PlacesAutoCompleteProps,
 } from "../Data/database";
-import { AlertCircle, Locate } from "lucide-react";
+import { newPlacesSessionToken } from "@/lib/geo";
+import { Locate } from "lucide-react";
 
-const KARACHI_BOUNDS = {
-  // Use 'north', 'south', 'east', 'west' keys at the top level
-  north: 25.15,  // Northeast latitude
-  south: 24.70,  // Southwest latitude
-  east: 67.25,   // Northeast longitude
-  west: 66.85,   // Southwest longitude
-};
+const DeliveryMap = dynamic(() => import("./DeliveryMap"), { ssr: false });
 
+const MIN_QUERY = 3;
+const DEBOUNCE_MS = 450;
 
-function GoogleMapsError({ title, message }: { title: string; message: string }) {
-  return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-      <div className="flex items-start gap-2">
-        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-        <div>
-          <p className="font-semibold">{title}</p>
-          <p className="mt-1">{message}</p>
-        </div>
-      </div>
-    </div>
-  );
+type Suggestion = { placeId: string; description: string; lat?: number; lng?: number };
+
+async function reverseGeocode(lat: number, lng: number) {
+  const res = await fetch(`/api/geo/reverse?lat=${lat}&lng=${lng}`);
+  if (!res.ok) throw new Error("Reverse geocode failed");
+  const data = (await res.json()) as { address?: string };
+  return data.address || "Address not found";
 }
 
-export default function LocationSelector({ allowChange = false }: LocationSelectorProps = {}){
-  return (
-    <GoogleMapsProvider>
-      <LocationSelectorLoaded allowChange={allowChange} />
-    </GoogleMapsProvider>
-  );
-}
-
-function LocationSelectorLoaded({ allowChange = false }: LocationSelectorProps = {}){
-  const { isLoaded, loadError, apiKeyMissing, authFailed } = useGoogleMaps();
-
-  if (apiKeyMissing) {
-    return (
-      <GoogleMapsError
-        title="Google Maps API key missing"
-        message="Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in .env.local and restart the dev server."
-      />
-    );
-  }
-
-  if (loadError || authFailed) {
-    return (
-      <GoogleMapsError
-        title="Google Maps is blocked for this page"
-        message="In Google Cloud Console, enable billing, turn on Maps JavaScript API, Places API, and Geocoding API, then add this site to the key's Website restrictions: http://localhost:3000/* and your production domain (https://craviopk.com/*)."
-      />
-    );
-  }
-
-  if (!isLoaded) return <Loading />;
-
-  return <Map allowChange={allowChange} />;
-}
-
-function Map({ allowChange = false }: LocationSelectorProps = {}) {
-  // Use a stable center point (Karachi)
+export default function LocationSelector({ allowChange = false }: LocationSelectorProps = {}) {
   const center = useMemo(() => ({ lat: 24.8607, lng: 67.0011 }), []);
   const [selected, setSelected] = useState<{ lat: number; lng: number } | null>(null);
   const [address, setAddress] = useState<string | null>(null);
-  const [mapOpen,setMapOpen] = useState<boolean>(false);
-  const {selectedAddress, setSelectedAddress, setCoordinates} = useLocation();
-  const {setCity,setBuilding,setStreet} = useUserInfo();
-  const {data:session} = useSession();
+  const [mapOpen, setMapOpen] = useState(false);
+  const { selectedAddress, setSelectedAddress, setCoordinates } = useLocation();
+  const { setCity, setBuilding, setStreet } = useUserInfo();
+  const { data: session } = useSession();
   const [isMobile, setIsMobile] = useState(false);
   const [locating, setLocating] = useState(false);
+
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -101,35 +62,22 @@ function Map({ allowChange = false }: LocationSelectorProps = {}) {
         if (!res.ok) return;
 
         const locationData = await res.json();
-        if(!locationData.placesauto){
-          return
+        if (!locationData.placesauto) return;
+
+        if (locationData?.placesauto) {
+          setAddress(locationData.placesauto);
+          setSelectedAddress(locationData.placesauto);
         }
-
-      if (locationData?.placesauto) {
-        setAddress(locationData.placesauto);
-        setSelectedAddress(locationData.placesauto);
-      } else {
-        console.warn("placesauto missing in location data");
-      }
-
-      if (locationData?.city) {
-        setCity(locationData.city);
-      } else {
-        console.warn("city missing in location data");
-      }
-
-      if (locationData?.building) {
-        setBuilding(locationData.building);
-      } else {
-        console.warn("building missing in location data");
-      }
-
-      if (locationData?.street) {
-        setStreet(locationData.street);
-      } else {
-        console.warn("street missing in location data");
-      }
-
+        if (locationData?.city) setCity(locationData.city);
+        if (locationData?.building) setBuilding(locationData.building);
+        if (locationData?.street) setStreet(locationData.street);
+        if (
+          typeof locationData?.latitude === "number" &&
+          typeof locationData?.longitude === "number"
+        ) {
+          setSelected({ lat: locationData.latitude, lng: locationData.longitude });
+          setCoordinates({ lat: locationData.latitude, lng: locationData.longitude });
+        }
       } catch (err) {
         console.error("Error fetching location:", err);
       }
@@ -137,50 +85,32 @@ function Map({ allowChange = false }: LocationSelectorProps = {}) {
 
     fetchSavedLocation();
     return () => window.removeEventListener("resize", onResize);
-  }, [session, setSelectedAddress, setCity, setBuilding, setStreet]);
-  const onMapClick = async (e: google.maps.MapMouseEvent) => {
-    if (e.latLng) {
-      const latLng = { lat: e.latLng.lat(), lng: e.latLng.lng() };
-      setSelected(latLng); // Set the marker
-      setCoordinates(latLng);
+  }, [session, setSelectedAddress, setCity, setBuilding, setStreet, setCoordinates]);
 
-      try {
-        // Perform Reverse Geocoding
-        const results = await getGeocode({ location: latLng });
-        
-        // Use the formatted address from the first result
-        const fullAddress = results[0]?.formatted_address || "Address not found";
-        setAddress(fullAddress);
-        setSelectedAddress(fullAddress);
-        
-      } catch (error) {
-        console.error("Error during reverse geocoding:", error);
-        setAddress("Error fetching address");
-      }
+  const applyPin = async (latLng: { lat: number; lng: number }) => {
+    setSelected(latLng);
+    setCoordinates(latLng);
+    try {
+      const fullAddress = await reverseGeocode(latLng.lat, latLng.lng);
+      setAddress(fullAddress);
+      setSelectedAddress(fullAddress);
+    } catch (error) {
+      console.error("Error during reverse geocoding:", error);
+      setAddress("Error fetching address");
     }
   };
 
-  // Define a stable map container style
-  const mapContainerStyle = useMemo(() => ({
-    width: '100%',
-    position: 'relative' as const,
-    zIndex: '100',
-    height: isMobile ? '320px' : '400px',
-    borderRadius: '0.75rem',
-    border: '1px solid #e2e8f0',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-  }), [isMobile]);
-
-  // Show search input only if allowChange is true OR no address is selected
   const showSearch = allowChange || !selectedAddress;
 
   return (
     <div className="flex flex-col gap-2 w-full ">
-      
-      {/* Search Input (Places Autocomplete) - Only show if allowed or no address selected */}
       {showSearch && (
         <div>
-          <PlacesAutoComplete setSelected={setSelected} setMapToOpen={setMapOpen} setAddress={setAddress} />
+          <PlacesAutoComplete
+            setSelected={setSelected}
+            setMapToOpen={setMapOpen}
+            setAddress={setAddress}
+          />
           <button
             type="button"
             onClick={async () => {
@@ -192,16 +122,9 @@ function Map({ allowChange = false }: LocationSelectorProps = {}) {
               navigator.geolocation.getCurrentPosition(
                 async (pos) => {
                   const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                  setSelected(latLng);
-                  setCoordinates(latLng);
                   setMapOpen(true);
                   try {
-                    const results = await getGeocode({ location: latLng });
-                    const fullAddress = results[0]?.formatted_address || "Address not found";
-                    setAddress(fullAddress);
-                    setSelectedAddress(fullAddress);
-                  } catch (err) {
-                    console.error("Reverse geocode failed", err);
+                    await applyPin(latLng);
                   } finally {
                     setLocating(false);
                   }
@@ -217,86 +140,145 @@ function Map({ allowChange = false }: LocationSelectorProps = {}) {
             className="mt-2 inline-flex items-center gap-2 justify-center w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             disabled={locating}
           >
-            <Locate className="text-primary"/>
+            <Locate className="text-primary" />
             {locating ? "Locating..." : "Use current location"}
           </button>
         </div>
       )}
       <AddressDisplay address={selectedAddress || address} />
-      {mapOpen?<button className="px-5 cursor-pointer py-2 hover:bg-secondary hover:text-accents w-full font-sifonn rounded-md bg-primary text-accents text-xs md:text-lg" onClick={()=>{setSelectedAddress(address ?? ""); if(selected){setCoordinates(selected)}; setMapOpen(false)}}>Confirm Delivery Address</button>:null}
-
-      {/* Google Map */}
       {mapOpen ? (
-        <div className="w-full">
-          <GoogleMap 
-            zoom={14}
-            center={selected || center}
-            mapContainerStyle={mapContainerStyle}
-            options={{ disableDefaultUI: true, zoomControl: true }}
-            onClick={onMapClick}
-          >
-            {selected && (
-              <Marker
-                position={selected}
-                draggable
-                onDragEnd={(e: google.maps.MapMouseEvent) => onMapClick(e)}
-              />
-            )}
-          </GoogleMap>
-        </div>
+        <button
+          className="px-5 cursor-pointer py-2 hover:bg-secondary hover:text-accents w-full font-sifonn rounded-md bg-primary text-accents text-xs md:text-lg"
+          onClick={() => {
+            setSelectedAddress(address ?? "");
+            if (selected) setCoordinates(selected);
+            setMapOpen(false);
+          }}
+        >
+          Confirm Delivery Address
+        </button>
+      ) : null}
+
+      {mapOpen ? (
+        <DeliveryMap
+          selected={selected ?? center}
+          onPick={applyPin}
+          height={isMobile ? 320 : 400}
+        />
       ) : null}
     </div>
-  )
+  );
 }
 
-const PlacesAutoComplete = ({setSelected,setAddress, setMapToOpen}:PlacesAutoCompleteProps)=>{
-  const {
-    ready,
-    value,
-    setValue,
-    suggestions:{status,data},
-    clearSuggestions,
-    init,
-  } = usePlacesAutocomplete({
-    initOnMount: false,
-    requestOptions:{
-      locationRestriction: KARACHI_BOUNDS,
-      componentRestrictions: { country: "pk" },
-    },
-  });
+function PlacesAutoComplete({
+  setSelected,
+  setAddress,
+  setMapToOpen,
+}: PlacesAutoCompleteProps) {
+  const { setCoordinates } = useLocation();
+  const [value, setValue] = useState("");
+  const [focused, setFocused] = useState(false);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [sessionToken, setSessionToken] = useState(newPlacesSessionToken);
+  const cache = useRef(new Map<string, Suggestion[]>());
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    init();
-  }, [init]);
+    const q = value.trim();
+    if (q.length < MIN_QUERY) {
+      setSuggestions([]);
+      return;
+    }
+    if (!focused) return;
 
-  const handleSelect = async (valadd: string) => {
-    setValue(valadd, false);
-    clearSuggestions();
-    // setAddress(null);
-    const results = await getGeocode({ address: valadd });
-    const { lat, lng } = await getLatLng(results[0]);
-    setSelected({ lat, lng });
+    const cached = cache.current.get(q.toLowerCase());
+    if (cached) {
+      setSuggestions(cached);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      try {
+        const res = await fetch(`/api/geo/search?q=${encodeURIComponent(q)}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          setSearchError("Address search is unavailable. Try Use current location or drop a pin on the map.");
+          return;
+        }
+        const data = (await res.json()) as { suggestions?: Suggestion[] };
+        const next = data.suggestions ?? [];
+        cache.current.set(q.toLowerCase(), next);
+        setSuggestions(next);
+        setSearchError(null);
+      } catch (err) {
+        if ((err as { name?: string }).name !== "AbortError") {
+          console.error("Autocomplete failed", err);
+        }
+      }
+    }, DEBOUNCE_MS);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, focused, sessionToken]);
+
+  const handleSelect = async (description: string) => {
+    const match = suggestions.find((s) => s.description === description);
+    setValue(description);
+    setSuggestions([]);
+    setAddress(description);
     setMapToOpen(true);
-    setAddress(valadd);
-  }
+    if (!match) return;
+    if (typeof match.lat === "number" && typeof match.lng === "number") {
+      const latLng = { lat: match.lat, lng: match.lng };
+      setSelected(latLng);
+      setCoordinates(latLng);
+      return;
+    }
+    try {
+      const res = await fetch(
+        `/api/places/geocode?placeId=${encodeURIComponent(match.placeId)}&address=${encodeURIComponent(description)}&sessionToken=${encodeURIComponent(sessionToken)}`
+      );
+      if (!res.ok) return;
+      const data = (await res.json()) as { lat?: number; lng?: number; address?: string };
+      if (typeof data.lat === "number" && typeof data.lng === "number") {
+        const latLng = { lat: data.lat, lng: data.lng };
+        setSelected(latLng);
+        setCoordinates(latLng);
+        if (data.address) setAddress(data.address);
+      }
+    } catch (err) {
+      console.error("Geocode failed", err);
+    } finally {
+      setSessionToken(newPlacesSessionToken());
+    }
+  };
+
   return (
     <Combobox onSelect={handleSelect}>
       <ComboboxInput
         value={value}
-        onChange = {(e)=>setValue(e.target.value)}
-        disabled={!ready}
+        onChange={(e) => setValue(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         placeholder="Search an Address"
         className="w-full"
       />
       <ComboboxPopover className="!z-[10020] bg-white shadow-lg">
         <ComboboxList>
-          {status==='OK' && data.map(({place_id,description})=>
-          <ComboboxOption key={place_id} value={description}/>
-          )}
+          {suggestions.map((s) => (
+            <ComboboxOption key={s.placeId} value={s.description} />
+          ))}
         </ComboboxList>
       </ComboboxPopover>
+      {searchError ? <p className="mt-1 text-xs text-amber-700">{searchError}</p> : null}
     </Combobox>
-  )
+  );
 }
 
 const AddressDisplay = ({ address }: AddressDisplayProps) => {

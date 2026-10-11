@@ -26,6 +26,16 @@ export function middleware(request: NextRequest) {
   const origin = request.headers.get("origin");
   const response = NextResponse.next();
 
+  // Geo/Places are browser-only on craviopk.com — never open them to every origin.
+  const isGeoPath =
+    pathname.startsWith("/api/geo/") || pathname.startsWith("/api/places/");
+  if (isGeoPath) {
+    if (request.method === "OPTIONS") {
+      return new NextResponse(null, { status: 204 });
+    }
+    return NextResponse.next();
+  }
+
   // Allow CravioPos (desktop) and common dev origins; also allow no origin (desktop HttpClient)
   if (isAllowedOrigin(origin)) {
     response.headers.set("Access-Control-Allow-Origin", origin || "*");
