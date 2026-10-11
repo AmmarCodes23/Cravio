@@ -182,6 +182,10 @@ export async function PATCH(
       );
     }
 
+    const before = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { category: true, company: true },
+    });
     const updated = await prisma.product.update({
       where: { id: productId },
       data,
@@ -189,7 +193,10 @@ export async function PATCH(
 
     await ensureCompanyCategoryLink(updated.companyId, updated.categoryId);
 
-    revalidateCatalog();
+    revalidateCatalog({
+      categories: [before?.category, updated.category],
+      companies: [before?.company, updated.company],
+    });
     return NextResponse.json(updated);
   } catch (error: unknown) {
     console.error("Error updating product:", error);
@@ -243,8 +250,8 @@ export async function DELETE(
       );
     }
 
-    await prisma.product.delete({ where: { id: productId } });
-    revalidateCatalog();
+    const deleted = await prisma.product.delete({ where: { id: productId } });
+    revalidateCatalog({ categories: [deleted.category], companies: [deleted.company] });
     return NextResponse.json({ message: "Product deleted successfully" });
   } catch (error: unknown) {
     console.error("Error deleting product:", error);

@@ -29,6 +29,7 @@ export type AggregateLocalSale = {
 export type LocalSaleAvgAggregateOutputType = {
   id: number | null
   vendorId: number | null
+  customerId: number | null
   ledgerEntryId: number | null
   receiptId: number | null
   discountTotal: number | null
@@ -44,6 +45,7 @@ export type LocalSaleAvgAggregateOutputType = {
 export type LocalSaleSumAggregateOutputType = {
   id: number | null
   vendorId: number | null
+  customerId: number | null
   ledgerEntryId: number | null
   receiptId: number | null
   discountTotal: number | null
@@ -60,6 +62,8 @@ export type LocalSaleMinAggregateOutputType = {
   id: number | null
   vendorId: number | null
   vendorName: string | null
+  customerId: number | null
+  customerName: string | null
   ledgerEntryId: number | null
   receiptId: number | null
   saleType: string | null
@@ -78,6 +82,8 @@ export type LocalSaleMaxAggregateOutputType = {
   id: number | null
   vendorId: number | null
   vendorName: string | null
+  customerId: number | null
+  customerName: string | null
   ledgerEntryId: number | null
   receiptId: number | null
   saleType: string | null
@@ -96,6 +102,8 @@ export type LocalSaleCountAggregateOutputType = {
   id: number
   vendorId: number
   vendorName: number
+  customerId: number
+  customerName: number
   ledgerEntryId: number
   receiptId: number
   saleType: number
@@ -115,6 +123,7 @@ export type LocalSaleCountAggregateOutputType = {
 export type LocalSaleAvgAggregateInputType = {
   id?: true
   vendorId?: true
+  customerId?: true
   ledgerEntryId?: true
   receiptId?: true
   discountTotal?: true
@@ -130,6 +139,7 @@ export type LocalSaleAvgAggregateInputType = {
 export type LocalSaleSumAggregateInputType = {
   id?: true
   vendorId?: true
+  customerId?: true
   ledgerEntryId?: true
   receiptId?: true
   discountTotal?: true
@@ -146,6 +156,8 @@ export type LocalSaleMinAggregateInputType = {
   id?: true
   vendorId?: true
   vendorName?: true
+  customerId?: true
+  customerName?: true
   ledgerEntryId?: true
   receiptId?: true
   saleType?: true
@@ -164,6 +176,8 @@ export type LocalSaleMaxAggregateInputType = {
   id?: true
   vendorId?: true
   vendorName?: true
+  customerId?: true
+  customerName?: true
   ledgerEntryId?: true
   receiptId?: true
   saleType?: true
@@ -182,6 +196,8 @@ export type LocalSaleCountAggregateInputType = {
   id?: true
   vendorId?: true
   vendorName?: true
+  customerId?: true
+  customerName?: true
   ledgerEntryId?: true
   receiptId?: true
   saleType?: true
@@ -287,6 +303,8 @@ export type LocalSaleGroupByOutputType = {
   id: number
   vendorId: number | null
   vendorName: string | null
+  customerId: number | null
+  customerName: string | null
   ledgerEntryId: number | null
   receiptId: number | null
   saleType: string
@@ -328,6 +346,8 @@ export type LocalSaleWhereInput = {
   id?: Prisma.IntFilter<"LocalSale"> | number
   vendorId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
   vendorName?: Prisma.StringNullableFilter<"LocalSale"> | string | null
+  customerId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
+  customerName?: Prisma.StringNullableFilter<"LocalSale"> | string | null
   ledgerEntryId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
   receiptId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
   saleType?: Prisma.StringFilter<"LocalSale"> | string
@@ -350,6 +370,8 @@ export type LocalSaleOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrderInput | Prisma.SortOrder
   vendorName?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerName?: Prisma.SortOrderInput | Prisma.SortOrder
   ledgerEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   receiptId?: Prisma.SortOrderInput | Prisma.SortOrder
   saleType?: Prisma.SortOrder
@@ -376,6 +398,8 @@ export type LocalSaleWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.LocalSaleWhereInput | Prisma.LocalSaleWhereInput[]
   vendorId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
   vendorName?: Prisma.StringNullableFilter<"LocalSale"> | string | null
+  customerId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
+  customerName?: Prisma.StringNullableFilter<"LocalSale"> | string | null
   ledgerEntryId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
   saleType?: Prisma.StringFilter<"LocalSale"> | string
   discountTotal?: Prisma.FloatFilter<"LocalSale"> | number
@@ -397,6 +421,8 @@ export type LocalSaleOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrderInput | Prisma.SortOrder
   vendorName?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerName?: Prisma.SortOrderInput | Prisma.SortOrder
   ledgerEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   receiptId?: Prisma.SortOrderInput | Prisma.SortOrder
   saleType?: Prisma.SortOrder
@@ -423,6 +449,8 @@ export type LocalSaleScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"LocalSale"> | number
   vendorId?: Prisma.IntNullableWithAggregatesFilter<"LocalSale"> | number | null
   vendorName?: Prisma.StringNullableWithAggregatesFilter<"LocalSale"> | string | null
+  customerId?: Prisma.IntNullableWithAggregatesFilter<"LocalSale"> | number | null
+  customerName?: Prisma.StringNullableWithAggregatesFilter<"LocalSale"> | string | null
   ledgerEntryId?: Prisma.IntNullableWithAggregatesFilter<"LocalSale"> | number | null
   receiptId?: Prisma.IntNullableWithAggregatesFilter<"LocalSale"> | number | null
   saleType?: Prisma.StringWithAggregatesFilter<"LocalSale"> | string
@@ -440,6 +468,8 @@ export type LocalSaleScalarWhereWithAggregatesInput = {
 export type LocalSaleCreateInput = {
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   saleType?: string
   discountTotal?: number
   grossTotal?: number
@@ -460,6 +490,8 @@ export type LocalSaleUncheckedCreateInput = {
   id?: number
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   ledgerEntryId?: number | null
   receiptId?: number | null
   saleType?: string
@@ -479,6 +511,8 @@ export type LocalSaleUncheckedCreateInput = {
 export type LocalSaleUpdateInput = {
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
   discountTotal?: Prisma.FloatFieldUpdateOperationsInput | number
   grossTotal?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -499,6 +533,8 @@ export type LocalSaleUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ledgerEntryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   receiptId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -519,6 +555,8 @@ export type LocalSaleCreateManyInput = {
   id?: number
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   ledgerEntryId?: number | null
   receiptId?: number | null
   saleType?: string
@@ -536,6 +574,8 @@ export type LocalSaleCreateManyInput = {
 export type LocalSaleUpdateManyMutationInput = {
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
   discountTotal?: Prisma.FloatFieldUpdateOperationsInput | number
   grossTotal?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -552,6 +592,8 @@ export type LocalSaleUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ledgerEntryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   receiptId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -580,6 +622,8 @@ export type LocalSaleCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
   vendorName?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
+  customerName?: Prisma.SortOrder
   ledgerEntryId?: Prisma.SortOrder
   receiptId?: Prisma.SortOrder
   saleType?: Prisma.SortOrder
@@ -597,6 +641,7 @@ export type LocalSaleCountOrderByAggregateInput = {
 export type LocalSaleAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
   ledgerEntryId?: Prisma.SortOrder
   receiptId?: Prisma.SortOrder
   discountTotal?: Prisma.SortOrder
@@ -613,6 +658,8 @@ export type LocalSaleMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
   vendorName?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
+  customerName?: Prisma.SortOrder
   ledgerEntryId?: Prisma.SortOrder
   receiptId?: Prisma.SortOrder
   saleType?: Prisma.SortOrder
@@ -631,6 +678,8 @@ export type LocalSaleMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
   vendorName?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
+  customerName?: Prisma.SortOrder
   ledgerEntryId?: Prisma.SortOrder
   receiptId?: Prisma.SortOrder
   saleType?: Prisma.SortOrder
@@ -648,6 +697,7 @@ export type LocalSaleMinOrderByAggregateInput = {
 export type LocalSaleSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
   ledgerEntryId?: Prisma.SortOrder
   receiptId?: Prisma.SortOrder
   discountTotal?: Prisma.SortOrder
@@ -775,6 +825,8 @@ export type LocalSaleUncheckedUpdateManyWithoutLedgerEntryNestedInput = {
 export type LocalSaleCreateWithoutReceiptForSaleInput = {
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   saleType?: string
   discountTotal?: number
   grossTotal?: number
@@ -794,6 +846,8 @@ export type LocalSaleUncheckedCreateWithoutReceiptForSaleInput = {
   id?: number
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   ledgerEntryId?: number | null
   receiptId?: number | null
   saleType?: string
@@ -817,6 +871,8 @@ export type LocalSaleCreateOrConnectWithoutReceiptForSaleInput = {
 export type LocalSaleCreateWithoutReceiptInput = {
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   saleType?: string
   discountTotal?: number
   grossTotal?: number
@@ -836,6 +892,8 @@ export type LocalSaleUncheckedCreateWithoutReceiptInput = {
   id?: number
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   ledgerEntryId?: number | null
   saleType?: string
   discountTotal?: number
@@ -870,6 +928,8 @@ export type LocalSaleUpdateToOneWithWhereWithoutReceiptForSaleInput = {
 export type LocalSaleUpdateWithoutReceiptForSaleInput = {
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
   discountTotal?: Prisma.FloatFieldUpdateOperationsInput | number
   grossTotal?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -889,6 +949,8 @@ export type LocalSaleUncheckedUpdateWithoutReceiptForSaleInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ledgerEntryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   receiptId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -918,6 +980,8 @@ export type LocalSaleUpdateToOneWithWhereWithoutReceiptInput = {
 export type LocalSaleUpdateWithoutReceiptInput = {
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
   discountTotal?: Prisma.FloatFieldUpdateOperationsInput | number
   grossTotal?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -937,6 +1001,8 @@ export type LocalSaleUncheckedUpdateWithoutReceiptInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ledgerEntryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
   discountTotal?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -955,6 +1021,8 @@ export type LocalSaleUncheckedUpdateWithoutReceiptInput = {
 export type LocalSaleCreateWithoutItemsInput = {
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   saleType?: string
   discountTotal?: number
   grossTotal?: number
@@ -974,6 +1042,8 @@ export type LocalSaleUncheckedCreateWithoutItemsInput = {
   id?: number
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   ledgerEntryId?: number | null
   receiptId?: number | null
   saleType?: string
@@ -1008,6 +1078,8 @@ export type LocalSaleUpdateToOneWithWhereWithoutItemsInput = {
 export type LocalSaleUpdateWithoutItemsInput = {
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
   discountTotal?: Prisma.FloatFieldUpdateOperationsInput | number
   grossTotal?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1027,6 +1099,8 @@ export type LocalSaleUncheckedUpdateWithoutItemsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ledgerEntryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   receiptId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1045,6 +1119,8 @@ export type LocalSaleUncheckedUpdateWithoutItemsInput = {
 export type LocalSaleCreateWithoutLedgerEntryInput = {
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   saleType?: string
   discountTotal?: number
   grossTotal?: number
@@ -1064,6 +1140,8 @@ export type LocalSaleUncheckedCreateWithoutLedgerEntryInput = {
   id?: number
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   receiptId?: number | null
   saleType?: string
   discountTotal?: number
@@ -1112,6 +1190,8 @@ export type LocalSaleScalarWhereInput = {
   id?: Prisma.IntFilter<"LocalSale"> | number
   vendorId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
   vendorName?: Prisma.StringNullableFilter<"LocalSale"> | string | null
+  customerId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
+  customerName?: Prisma.StringNullableFilter<"LocalSale"> | string | null
   ledgerEntryId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
   receiptId?: Prisma.IntNullableFilter<"LocalSale"> | number | null
   saleType?: Prisma.StringFilter<"LocalSale"> | string
@@ -1130,6 +1210,8 @@ export type LocalSaleCreateManyLedgerEntryInput = {
   id?: number
   vendorId?: number | null
   vendorName?: string | null
+  customerId?: number | null
+  customerName?: string | null
   receiptId?: number | null
   saleType?: string
   discountTotal?: number
@@ -1146,6 +1228,8 @@ export type LocalSaleCreateManyLedgerEntryInput = {
 export type LocalSaleUpdateWithoutLedgerEntryInput = {
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
   discountTotal?: Prisma.FloatFieldUpdateOperationsInput | number
   grossTotal?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1165,6 +1249,8 @@ export type LocalSaleUncheckedUpdateWithoutLedgerEntryInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiptId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
   discountTotal?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1184,6 +1270,8 @@ export type LocalSaleUncheckedUpdateManyWithoutLedgerEntryInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   vendorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   vendorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiptId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   saleType?: Prisma.StringFieldUpdateOperationsInput | string
   discountTotal?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1232,6 +1320,8 @@ export type LocalSaleSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   id?: boolean
   vendorId?: boolean
   vendorName?: boolean
+  customerId?: boolean
+  customerName?: boolean
   ledgerEntryId?: boolean
   receiptId?: boolean
   saleType?: boolean
@@ -1255,6 +1345,8 @@ export type LocalSaleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   vendorId?: boolean
   vendorName?: boolean
+  customerId?: boolean
+  customerName?: boolean
   ledgerEntryId?: boolean
   receiptId?: boolean
   saleType?: boolean
@@ -1275,6 +1367,8 @@ export type LocalSaleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   vendorId?: boolean
   vendorName?: boolean
+  customerId?: boolean
+  customerName?: boolean
   ledgerEntryId?: boolean
   receiptId?: boolean
   saleType?: boolean
@@ -1295,6 +1389,8 @@ export type LocalSaleSelectScalar = {
   id?: boolean
   vendorId?: boolean
   vendorName?: boolean
+  customerId?: boolean
+  customerName?: boolean
   ledgerEntryId?: boolean
   receiptId?: boolean
   saleType?: boolean
@@ -1309,7 +1405,7 @@ export type LocalSaleSelectScalar = {
   createdAt?: boolean
 }
 
-export type LocalSaleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "vendorName" | "ledgerEntryId" | "receiptId" | "saleType" | "discountTotal" | "grossTotal" | "netTotal" | "cashPaid" | "onlinePaid" | "cashCollected" | "changeGiven" | "creditAmount" | "createdAt", ExtArgs["result"]["localSale"]>
+export type LocalSaleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "vendorName" | "customerId" | "customerName" | "ledgerEntryId" | "receiptId" | "saleType" | "discountTotal" | "grossTotal" | "netTotal" | "cashPaid" | "onlinePaid" | "cashCollected" | "changeGiven" | "creditAmount" | "createdAt", ExtArgs["result"]["localSale"]>
 export type LocalSaleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ledgerEntry?: boolean | Prisma.LocalSale$ledgerEntryArgs<ExtArgs>
   receipt?: boolean | Prisma.LocalSale$receiptArgs<ExtArgs>
@@ -1338,6 +1434,8 @@ export type $LocalSalePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     id: number
     vendorId: number | null
     vendorName: string | null
+    customerId: number | null
+    customerName: string | null
     ledgerEntryId: number | null
     receiptId: number | null
     saleType: string
@@ -1780,6 +1878,8 @@ export interface LocalSaleFieldRefs {
   readonly id: Prisma.FieldRef<"LocalSale", 'Int'>
   readonly vendorId: Prisma.FieldRef<"LocalSale", 'Int'>
   readonly vendorName: Prisma.FieldRef<"LocalSale", 'String'>
+  readonly customerId: Prisma.FieldRef<"LocalSale", 'Int'>
+  readonly customerName: Prisma.FieldRef<"LocalSale", 'String'>
   readonly ledgerEntryId: Prisma.FieldRef<"LocalSale", 'Int'>
   readonly receiptId: Prisma.FieldRef<"LocalSale", 'Int'>
   readonly saleType: Prisma.FieldRef<"LocalSale", 'String'>

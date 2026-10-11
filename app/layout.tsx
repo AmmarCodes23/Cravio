@@ -3,6 +3,7 @@ import "./globals.css";
 import localFont from "next/font/local";
 import Provider from "./context/SessionProvider";
 import LayoutSwitcher from "./components/LayoutSwitcher";
+import { getCategories, getCompanies } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   icons: {
@@ -26,16 +27,28 @@ const dansonFont = localFont({
   variable: "--font-danson",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Cached (Data Cache, tag "catalog"); seeds the client providers so every
+  // storefront page skips the /api/category + /api/company fetches on mount.
+  const [initialCategories, initialCompanies] = await Promise.all([
+    getCategories().catch(() => null),
+    getCompanies().catch(() => null),
+  ]);
+
   return (
     <html lang="en">
       <body className={`${sifonnFont.variable} ${brasikaFont.variable}`}>
         <Provider>
-          <LayoutSwitcher>{children}</LayoutSwitcher>
+          <LayoutSwitcher
+            initialCategories={initialCategories}
+            initialCompanies={initialCompanies}
+          >
+            {children}
+          </LayoutSwitcher>
         </Provider>
       </body>
     </html>

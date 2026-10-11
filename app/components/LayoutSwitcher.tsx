@@ -26,9 +26,15 @@ import { VendorProvider } from "../context/VendorContext";
 import VendorModal from "./VendorModal";
 import NavigationPending from "./NavigationPending";
 import { useEffect, useLayoutEffect, useRef } from "react";
+import type { CategoryFetch, Company } from "../Data/database";
 
 type LayoutProps = {
   children: React.ReactNode;
+};
+
+type CatalogSeed = {
+  initialCategories?: CategoryFetch[] | null;
+  initialCompanies?: Company[] | null;
 };
 
 const ADMIN_LINKS = [
@@ -85,11 +91,11 @@ function ContentLayout({ children }: LayoutProps) {
   );
 }
 
-function SiteShell({ children }: LayoutProps) {
+function SiteShell({ children, initialCategories, initialCompanies }: LayoutProps & CatalogSeed) {
   return (
     <ProductsProvider>
-      <CategoryProvider>
-        <CompaniesProvider>
+      <CategoryProvider initialData={initialCategories}>
+        <CompaniesProvider initialData={initialCompanies}>
           <ProductModalProvider>
             <LoginModalProvider>
               <VendorProvider>
@@ -215,7 +221,11 @@ function AdminShell({ children }: LayoutProps) {
   );
 }
 
-export default function LayoutSwitcher({ children }: LayoutProps) {
+export default function LayoutSwitcher({
+  children,
+  initialCategories,
+  initialCompanies,
+}: LayoutProps & CatalogSeed) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const router = useRouter();
@@ -234,6 +244,10 @@ export default function LayoutSwitcher({ children }: LayoutProps) {
     return <AdminShell>{children}</AdminShell>;
   }
 
-  return <SiteShell>{children}</SiteShell>;
+  return (
+    <SiteShell initialCategories={initialCategories} initialCompanies={initialCompanies}>
+      {children}
+    </SiteShell>
+  );
 }
 

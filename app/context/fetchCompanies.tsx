@@ -13,11 +13,20 @@ type CompanyValue = {
 
 const CompanyContext = createContext<CompanyValue | null>(null);
 
-export function CompaniesProvider({children}:{children:React.ReactNode}) {
-    const [companies,setCompanies] = useState<Company[]>([]);
-    const [loading, setLoading] = useState(true);
+export function CompaniesProvider({
+  children,
+  initialData,
+}: {
+  children: React.ReactNode;
+  /** Complete list from the server render; when present the mount-time /api/company fetch is skipped. */
+  initialData?: Company[] | null;
+}) {
+    const hasInitial = Boolean(initialData && initialData.length > 0);
+    const [companies,setCompanies] = useState<Company[]>(initialData ?? []);
+    const [loading, setLoading] = useState(!hasInitial);
 
   useEffect(() => {
+    if (hasInitial) return;
     let cancelled = false;
     (async () => {
       try {
@@ -33,7 +42,7 @@ export function CompaniesProvider({children}:{children:React.ReactNode}) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [hasInitial]);
 
   return (
     <CompanyContext.Provider value={{companies,setCompanies, loading, CompaniesFetch: companies, setCompaniesFetch: setCompanies}}>

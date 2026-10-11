@@ -10,6 +10,7 @@ export interface CategoryFetch {
   id: number;
   name: string;
   url: string;
+  image?: string | null;
   productCount: number;
   isHidden?: boolean;
 }
@@ -44,8 +45,9 @@ export interface Product {
   description: string | null;
   companyImage: string;
   isHidden?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  /** Not selected for storefront payloads (saves ~60 bytes/product in ISR output). */
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface DealsCardProps {
@@ -244,6 +246,7 @@ export interface CatalogCategory {
   id: number;
   name: string;
   url: string;
+  image?: string | null;
   productCount: number;
   isHidden?: boolean;
 }

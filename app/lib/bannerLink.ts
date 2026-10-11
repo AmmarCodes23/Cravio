@@ -1,12 +1,11 @@
+import { companySlug } from "@/lib/company-slug";
+
 /** Helpers for marketing banner click targets (homepage carousel). */
 
 export type BannerLinkKind = "none" | "external" | "category" | "company";
 
 export function companyPathSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  return companySlug(name);
 }
 
 export function buildCategoryLink(categoryName: string): string {

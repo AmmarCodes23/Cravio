@@ -215,6 +215,7 @@ const Navbar: React.FC = () => {
                     src="/images/plastic-bag.png"
                     alt="cart"
                     fill
+                    sizes="48px"
                 />
               </div>
               <div className="rounded-full w-5 h-5 bg-primary absolute -top-1 -right-1 text-accents text-xs flex items-center justify-center font-bold">

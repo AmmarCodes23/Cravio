@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { Prisma } from "@/generated/prisma/client";
 import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
-import { CATALOG_CACHE_CONTROL, getCompanies, revalidateCatalog } from "@/lib/catalog";
+import { CATALOG_CACHE_CONTROL, getCompanies, revalidateCatalogForProducts } from "@/lib/catalog";
 
 type CompanyInput = {
   name: string;
@@ -140,7 +140,10 @@ export async function POST(request: Request) {
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
-      revalidateCatalog();
+      await revalidateCatalogForProducts(
+        { companyId: { in: results.map((c) => c.id) } },
+        { companies: results.map((c) => c.name) }
+      );
       return NextResponse.json(
         {
           message: "Companies seeded successfully",
@@ -215,7 +218,10 @@ export async function POST(request: Request) {
       results.push(companyRecord);
     }
 
-    revalidateCatalog();
+    await revalidateCatalogForProducts(
+      { companyId: { in: results.map((c) => c.id) } },
+      { companies: results.map((c) => c.name) }
+    );
     return NextResponse.json(
       {
         message: "Companies created/updated successfully",

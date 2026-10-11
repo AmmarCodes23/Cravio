@@ -3,6 +3,7 @@ import Link from "next/link";
 import CatalogImage from "../components/CatalogImage";
 import { useCompanies } from "../context/fetchCompanies";
 import Loading from "../components/Loading";
+import { companySlug } from "@/lib/company-slug";
 
 export default function CompaniesPage() {
   const { CompaniesFetch, loading } = useCompanies();
@@ -26,7 +27,7 @@ export default function CompaniesPage() {
           {CompaniesFetch.map(company => (
             <Link 
               key={company.name}
-              href={`/companies/${company.name.toLowerCase().replace(/\s+/g, '-')}`}
+              href={`/companies/${companySlug(company.name)}`}
               scroll={false}
               className="group flex flex-col items-center"
             >

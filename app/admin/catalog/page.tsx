@@ -244,7 +244,6 @@ export default function CatalogAdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: categoryForm.name.trim(),
-          url: imageUrl,
           image: imageUrl || undefined,
           isHidden: Boolean(categoryForm.isHidden),
         }),
@@ -534,7 +533,7 @@ export default function CatalogAdminPage() {
       setEditingCategoryId(cat.id);
       setCategoryForm({
         name: cat.name,
-        url: cat.url,
+        url: cat.image || "",
         isHidden: cat.isHidden ?? false,
         imageMode: "url",
         imageFile: null,

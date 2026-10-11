@@ -249,6 +249,8 @@ model LocalSale {
   id             Int              @id @default(autoincrement())
   vendorId       Int?
   vendorName     String?
+  customerId     Int?
+  customerName   String?
   ledgerEntryId  Int?
   ledgerEntry    LedgerEntry?     @relation(fields: [ledgerEntryId], references: [id], onDelete: SetNull)
   receiptId      Int?             @unique

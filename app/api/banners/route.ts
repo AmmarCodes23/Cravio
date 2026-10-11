@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       },
     });
 
-    revalidateCatalog();
+    revalidateCatalog({ banners: true });
     return NextResponse.json(banner, { status: 201 });
   } catch (error) {
     console.error("Error creating banner:", error);

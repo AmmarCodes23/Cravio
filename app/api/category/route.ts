@@ -4,7 +4,8 @@ import fs from "fs";
 import path from "path";
 import { Prisma } from "@/generated/prisma/client";
 import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
-import { CATALOG_CACHE_CONTROL, getCategories, revalidateCatalog } from "@/lib/catalog";
+import { CATALOG_CACHE_CONTROL, getCategories, revalidateCatalogForProducts } from "@/lib/catalog";
+import { looksLikeRemoteUrl, resolveCategorySlug } from "@/lib/company-slug";
 
 type CategoryInput = {
   name: string;
@@ -14,11 +15,15 @@ type CategoryInput = {
   isHidden?: boolean;
 };
 
-const slugify = (value: string) =>
-  value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+function categoryWriteFields(category: CategoryInput) {
+  const image =
+    category.image?.trim() ||
+    (looksLikeRemoteUrl(category.url) ? category.url!.trim() : undefined);
+  return {
+    url: resolveCategorySlug(category.name, category.url),
+    ...(image ? { image } : {}),
+  };
+}
 
 // POST - Seed categories or create categories
 export async function POST(request: Request) {
@@ -53,35 +58,31 @@ export async function POST(request: Request) {
         );
       }
 
-      const categoriesWithUrls = (categories as CategoryInput[]).map(
-        (category) => ({
-          ...category,
-          url: category.url || slugify(category.name),
-        })
-      );
-
       const results = await Promise.all(
-        categoriesWithUrls.map((category) =>
-          prisma.category.upsert({
+        (categories as CategoryInput[]).map((category) => {
+          const fields = categoryWriteFields(category);
+          return prisma.category.upsert({
             where: { name: category.name },
             update: {
-              url: category.url,
-              image: category.image ?? undefined,
+              ...fields,
               productCount: category.productCount || 0,
               ...(category.isHidden !== undefined ? { isHidden: Boolean(category.isHidden) } : {}),
             },
             create: {
               name: category.name,
-              url: category.url,
-              image: category.image ?? undefined,
+              url: fields.url,
+              image: fields.image,
               productCount: category.productCount || 0,
               isHidden: category.isHidden !== undefined ? Boolean(category.isHidden) : false,
             },
-          })
-        )
+          });
+        })
       );
 
-      revalidateCatalog();
+      await revalidateCatalogForProducts(
+        { categoryId: { in: results.map((c) => c.id) } },
+        { categories: results.map((c) => c.name) }
+      );
       return NextResponse.json(
         {
           message: "Categories seeded successfully",
@@ -112,33 +113,31 @@ export async function POST(request: Request) {
       }
     }
 
-    const categoriesWithUrls = payloads.map((category) => ({
-      ...category,
-      url: category.url || slugify(category.name),
-    }));
-
     const results = await Promise.all(
-      categoriesWithUrls.map((category) =>
-        prisma.category.upsert({
+      payloads.map((category) => {
+        const fields = categoryWriteFields(category);
+        return prisma.category.upsert({
           where: { name: category.name },
           update: {
-            url: category.url,
-            image: category.image ?? undefined,
+            ...fields,
             productCount: category.productCount || 0,
             ...(category.isHidden !== undefined ? { isHidden: Boolean(category.isHidden) } : {}),
           },
           create: {
             name: category.name,
-            url: category.url,
-            image: category.image ?? undefined,
+            url: fields.url,
+            image: fields.image,
             productCount: category.productCount || 0,
             isHidden: category.isHidden !== undefined ? Boolean(category.isHidden) : false,
           },
-        })
-      )
+        });
+      })
     );
 
-    revalidateCatalog();
+    await revalidateCatalogForProducts(
+      { categoryId: { in: results.map((c) => c.id) } },
+      { categories: results.map((c) => c.name) }
+    );
     return NextResponse.json(
       {
         message: "Categories created/updated successfully",

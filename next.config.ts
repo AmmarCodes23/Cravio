@@ -2,7 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    formats: ["image/avif", "image/webp"],
+    // webp only: avif + webp doubled the transformations billed per static asset.
+    formats: ["image/webp"],
     remotePatterns: [
       {
         protocol: "https",

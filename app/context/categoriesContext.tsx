@@ -11,10 +11,18 @@ type CategoryValue = {
 
 const CategoryContext = createContext<CategoryValue | null>(null);
 
-export function CategoryProvider({children}:{children:React.ReactNode}) {
-    const [categories,setCategories] = useState<CategoryFetch[] | null>(null);
+export function CategoryProvider({
+  children,
+  initialData,
+}: {
+  children: React.ReactNode;
+  /** Complete list from the server render; when present the mount-time /api/category fetch is skipped. */
+  initialData?: CategoryFetch[] | null;
+}) {
+    const [categories,setCategories] = useState<CategoryFetch[] | null>(initialData ?? null);
 
   useEffect(() => {
+    if (initialData && initialData.length > 0) return;
     let cancelled = false;
     (async () => {
       try {
@@ -28,7 +36,7 @@ export function CategoryProvider({children}:{children:React.ReactNode}) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialData]);
 
   return (
     <CategoryContext.Provider value={{categories,setCategories, CategoryFetched: categories, setCategoryFetched: setCategories}}>

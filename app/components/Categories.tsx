@@ -8,6 +8,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { useCategory } from '../context/categoriesContext';
 import { useCompanies } from '../context/fetchCompanies';
 import { CategoryFetch, Company } from '../Data/database';
+import { companySlug } from "@/lib/company-slug";
 
 export default function Categories({
   categories: categoriesProp,
@@ -516,7 +517,7 @@ export default function Categories({
                     >
                       <div className="relative overflow-hidden w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center">
                           <CatalogImage
-                            src={category.url}
+                            src={category.image}
                             alt={category.name}
                             fill
                             sizes="112px"
@@ -553,7 +554,7 @@ export default function Categories({
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 md:gap-3.5 justify-items-center">
                     {visibleCompanies?visibleCompanies.map((company: Company, index:number) => (
                       <Link
-                        href={`/companies/${company.name.toLowerCase().replace(/\s+/g, '-')}`}
+                        href={`/companies/${companySlug(company.name)}`}
                         key={index}
                         scroll={false}
                         className="flex-shrink-0"

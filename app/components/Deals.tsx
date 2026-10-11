@@ -8,6 +8,8 @@ import Loading from './Loading';
 import { useProduct } from '../context/ProductsContext';
 import { useCartContext } from '../context/CartContext';
 
+// Keep in sync with HOME_CATEGORY_ROW_LIMIT / HOME_HOT_DEALS_LIMIT in lib/catalog.ts
+// (server pre-slices the home payload with the same rules).
 const CATEGORY_ROW_LIMIT = 12;
 
 export default function Deals({Name, range, index, filterCategory, products: productsProp}:DealsCardProps) {

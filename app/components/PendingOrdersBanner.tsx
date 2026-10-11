@@ -5,6 +5,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Package, X, Clock } from 'lucide-react';
 import type { PendingOrder, UserOrder } from "../Data/database";
 
+const ORDERS_POLL_MS = 60_000;
+
 const PendingOrdersBanner = () => {
   const { data: session } = useSession();
   const router = useRouter();
@@ -15,59 +17,79 @@ const PendingOrdersBanner = () => {
   useEffect(() => {
   if (!session) return;
 
-  const fetchInitialOrders = async () => {
+  // The SSE route holds a dedicated Postgres connection and a long-running
+  // function per tab. Only open it when the user actually has an order in
+  // flight; otherwise poll /api/orders (cheap, cached per user) every minute.
+  let cancelled = false;
+  let eventSource: EventSource | null = null;
+  let pollTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const fetchPendingOrders = async (): Promise<PendingOrder[] | null> => {
     try {
       const res = await fetch("/api/orders");
-      if (res.ok) {
-        const orders: UserOrder[] = await res.json();
-        setPendingOrders(
-          orders.filter(
-            (o) => o.status !== "DELIVERED" && o.status !== "CANCELLED"
-          )
-        );
-      }
+      if (!res.ok) return null;
+      const orders: UserOrder[] = await res.json();
+      return orders.filter(
+        (o) => o.status !== "DELIVERED" && o.status !== "CANCELLED"
+      );
     } catch (err) {
       console.error("Initial fetch error:", err);
+      return null;
     }
   };
 
-  fetchInitialOrders();
+  const poll = async () => {
+    const pending = await fetchPendingOrders();
+    if (cancelled) return;
+    if (pending) setPendingOrders(pending);
+    if (pending && pending.length > 0) {
+      openStream();
+    } else {
+      pollTimer = setTimeout(poll, ORDERS_POLL_MS);
+    }
+  };
 
-  const eventSource = new EventSource(`/api/order-events?cb=${Date.now()}`);
+  const openStream = () => {
+    eventSource = new EventSource(`/api/order-events?cb=${Date.now()}`);
 
-  eventSource.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
 
-      switch (data.type) {
-        case "PENDING_ORDERS":
-          setPendingOrders(data.orders);
-          break;
-        case "NEW_ORDER":
-          setPendingOrders((prev) => [...prev, data.order]);
-          break;
-        case "ORDER_UPDATED":
-          setPendingOrders((prev) =>
-            prev.map((o) => (o.id === data.order.id ? data.order : o))
-          );
-          break;
+        switch (data.type) {
+          case "PENDING_ORDERS":
+            setPendingOrders(data.orders);
+            break;
+          case "NEW_ORDER":
+            setPendingOrders((prev) => [...prev, data.order]);
+            break;
+          case "ORDER_UPDATED":
+            setPendingOrders((prev) =>
+              prev.map((o) => (o.id === data.order.id ? data.order : o))
+            );
+            break;
+        }
+      } catch (err) {
+        console.error("SSE parse error:", err);
       }
-    } catch (err) {
-      console.error("SSE parse error:", err);
-    }
+    };
+
+    eventSource.onerror = (event) => {
+      // Only log warnings instead of full object
+      console.warn(
+        "SSE connection error, connection may retry automatically.",
+        event
+      );
+      // Do NOT close the EventSource; the browser reconnects automatically
+    };
   };
 
-  eventSource.onerror = (event) => {
-    // Only log warnings instead of full object
-    console.warn(
-      "SSE connection error, connection may retry automatically.",
-      event
-    );
-    // Do NOT close the EventSource; the browser reconnects automatically
-  };
+  poll();
 
   return () => {
-    eventSource.close();
+    cancelled = true;
+    eventSource?.close();
+    if (pollTimer) clearTimeout(pollTimer);
   };
 }, [session]);
 

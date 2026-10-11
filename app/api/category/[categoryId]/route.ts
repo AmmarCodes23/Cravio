@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
-import { revalidateCatalog } from "@/lib/catalog";
-
-const slugify = (value: string) =>
-  value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+import { revalidateCatalog, revalidateCatalogForProducts } from "@/lib/catalog";
+import {
+  categorySlug,
+  looksLikeRemoteUrl,
+  resolveCategorySlug,
+} from "@/lib/company-slug";
+import { nextStoredImage } from "@/lib/product-image";
 
 export async function GET(
   _request: Request,
@@ -42,6 +42,14 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid category id" }, { status: 400 });
     }
 
+    const existing = await prisma.category.findUnique({
+      where: { id: categoryId },
+      select: { name: true, url: true, image: true },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+    }
+
     const body = (await request.json()) as {
       name?: string;
       url?: string;
@@ -59,12 +67,21 @@ export async function PATCH(
       data.name = String(body.name);
     }
 
-    if (body.url !== undefined) {
-      data.url = body.url ? String(body.url) : undefined;
+    if (body.image !== undefined) {
+      data.image = nextStoredImage(body.image, existing.image);
+    } else if (looksLikeRemoteUrl(body.url)) {
+      data.image = nextStoredImage(body.url!.trim(), existing.image);
     }
 
-    if (body.image !== undefined) {
-      data.image = body.image ? String(body.image).trim() : null;
+    const nameForSlug = body.name !== undefined ? String(body.name) : existing.name;
+    if (body.url !== undefined && !looksLikeRemoteUrl(body.url) && body.url.trim()) {
+      data.url = resolveCategorySlug(nameForSlug, body.url);
+    } else if (
+      body.name !== undefined ||
+      looksLikeRemoteUrl(body.url) ||
+      looksLikeRemoteUrl(existing.url)
+    ) {
+      data.url = categorySlug(nameForSlug);
     }
 
     if (body.productCount !== undefined) {
@@ -73,10 +90,6 @@ export async function PATCH(
         return NextResponse.json({ error: "Invalid product count" }, { status: 400 });
       }
       data.productCount = count;
-    }
-
-    if (data.name && !data.url) {
-      data.url = slugify(String(data.name));
     }
 
     if (Object.keys(data).length === 0) {
@@ -98,7 +111,10 @@ export async function PATCH(
       });
     }
 
-    revalidateCatalog();
+    await revalidateCatalogForProducts(
+      { categoryId },
+      { categories: [existing.name, updated.name] }
+    );
     return NextResponse.json(updated);
   } catch (error: unknown) {
     console.error("Error updating category:", error);
@@ -142,8 +158,8 @@ export async function DELETE(
       );
     }
 
-    await prisma.category.delete({ where: { id: categoryId } });
-    revalidateCatalog();
+    const deleted = await prisma.category.delete({ where: { id: categoryId } });
+    revalidateCatalog({ categories: [deleted.name] });
     return NextResponse.json({ message: "Category deleted successfully" });
   } catch (error: unknown) {
     console.error("Error deleting category:", error);

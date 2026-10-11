@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { ensureAdminOrPosApiKey } from "@/lib/pos-or-admin-auth";
-import { revalidateCatalog } from "@/lib/catalog";
+import { revalidateCatalog, revalidateCatalogForProducts } from "@/lib/catalog";
 
 export async function GET(
   _request: Request,
@@ -88,6 +88,10 @@ export async function PATCH(
       );
     }
 
+    const before =
+      data.name !== undefined
+        ? await prisma.company.findUnique({ where: { id: companyId }, select: { name: true } })
+        : null;
     const updated = await prisma.company.update({
       where: { id: companyId },
       data,
@@ -116,7 +120,10 @@ export async function PATCH(
       });
     }
 
-    revalidateCatalog();
+    await revalidateCatalogForProducts(
+      { companyId },
+      { companies: [before?.name, updated.name] }
+    );
     return NextResponse.json(updated);
   } catch (error: unknown) {
     console.error("Error updating company:", error);
@@ -160,8 +167,8 @@ export async function DELETE(
       );
     }
 
-    await prisma.company.delete({ where: { id: companyId } });
-    revalidateCatalog();
+    const deleted = await prisma.company.delete({ where: { id: companyId } });
+    revalidateCatalog({ companies: [deleted.name] });
     return NextResponse.json({ message: "Company deleted successfully" });
   } catch (error: unknown) {
     console.error("Error deleting company:", error);

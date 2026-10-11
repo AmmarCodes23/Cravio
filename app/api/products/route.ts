@@ -256,7 +256,10 @@ export async function POST(request: Request) {
         await new Promise((resolve) => setTimeout(resolve, 200));
       }
 
-      revalidateCatalog();
+      revalidateCatalog({
+        categories: results.map((p) => p.category),
+        companies: results.map((p) => p.company),
+      });
       return NextResponse.json(
         {
           message: "Products seeded successfully",
@@ -295,7 +298,10 @@ export async function POST(request: Request) {
       })
     );
 
-    revalidateCatalog();
+    revalidateCatalog({
+      categories: products.map((p) => p.category),
+      companies: products.map((p) => p.company),
+    });
     return NextResponse.json(
       { message: "Products created successfully", count: products.length, products },
       { status: 201 }

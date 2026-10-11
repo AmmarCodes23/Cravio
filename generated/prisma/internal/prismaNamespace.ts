@@ -2250,6 +2250,8 @@ export const LocalSaleScalarFieldEnum = {
   id: 'id',
   vendorId: 'vendorId',
   vendorName: 'vendorName',
+  customerId: 'customerId',
+  customerName: 'customerName',
   ledgerEntryId: 'ledgerEntryId',
   receiptId: 'receiptId',
   saleType: 'saleType',
